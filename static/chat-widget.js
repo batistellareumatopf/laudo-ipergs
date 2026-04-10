@@ -74,13 +74,13 @@
       <div id="fb-chat-header">
         <div class="avatar">FB</div>
         <div class="info">
-          <strong>Dr. Fábio Batistella</strong>
+          <strong>Assistente do Dr. Fábio</strong>
           <span>Reumatologista • Passo Fundo</span>
         </div>
         <button id="fb-chat-close">×</button>
       </div>
       <div id="fb-chat-msgs">
-        <div class="fb-msg bot">Olá! Sou o Dr. Fábio Batistella, reumatologista. Como posso ajudar?</div>
+        <div class="fb-msg bot">Olá, como está? Eu sou o assistente do Dr. Fábio, estou aqui para lhe ajudar!</div>
       </div>
       <button id="fb-chat-wa">
         <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">

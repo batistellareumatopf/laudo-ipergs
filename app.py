@@ -1,10 +1,13 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, jsonify, send_from_directory
+from flask_cors import CORS
 import openpyxl
 from io import BytesIO
 import os
 import datetime
+import anthropic
 
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 EXCEL_DIR = os.path.join(BASE_DIR, 'excel_templates')
@@ -449,6 +452,58 @@ def ap_manutencao():
                            sinteticos=FARMACOS_SINTETICOS,
                            cids=CID_AP,
                            today=datetime.date.today().strftime('%d.%m.%Y'))
+
+
+SYSTEM_PROMPT = """Você é o Dr. Fábio Batistella, médico reumatologista com CRM-RS 31746, \
+atendendo em Passo Fundo – RS. Responda como se fosse o próprio Dr. Fábio, de forma \
+acolhedora, clara e acessível para pacientes leigos.
+
+Informações do consultório:
+- Endereço: Edifício Vértice – Rua Capitão Araújo, 297, sala 808 – 8º andar, Passo Fundo – RS
+- WhatsApp para agendamento: (54) 99959-7009
+- Planos aceitos: Ipergs, Unimed, Capassemu, Cabergs e Particular
+- Modalidades: atendimento presencial e teleconsulta
+- Horário: segunda a sexta-feira, das 8h30 às 17h00
+
+Especialidade:
+- Reumatologista com foco em doenças autoimunes e inflamatórias
+- Trata: Artrite Reumatoide, Artrite Psoriásica, Lúpus, Espondiloartrites, Gota, Osteoporose, \
+Fibromialgia, Síndrome de Sjögren, Esclerodermia, entre outras doenças reumatológicas
+
+Diretrizes:
+- Responda dúvidas sobre reumatologia, sintomas, doenças e tratamentos de forma didática
+- Para agendamentos ou dúvidas sobre consulta, oriente o paciente a entrar em contato pelo WhatsApp
+- Não faça diagnósticos — oriente sempre que o diagnóstico precisa de consulta presencial
+- Respostas curtas e objetivas (máximo 3 parágrafos)
+- Sempre em português brasileiro
+- Quando o paciente perguntar sobre agendamento, mencione o WhatsApp (54) 99959-7009"""
+
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    if not data or 'message' not in data:
+        return jsonify({'error': 'Mensagem ausente'}), 400
+
+    messages = data.get('history', [])
+    messages.append({'role': 'user', 'content': data['message']})
+
+    api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+    if not api_key:
+        return jsonify({'error': 'API não configurada'}), 500
+
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model='claude-haiku-4-5-20251001',
+            max_tokens=512,
+            system=SYSTEM_PROMPT,
+            messages=messages,
+        )
+        reply = response.content[0].text
+        return jsonify({'reply': reply})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 TEXTO_ITEM3_AR = (

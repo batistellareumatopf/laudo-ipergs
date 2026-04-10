@@ -37,6 +37,16 @@ FARMACOS_BIOLOGICOS = [
     'Guselcumabe 100mg SC',
 ]
 
+# Fármacos listados nos termos de consentimento originais
+FARMACOS_TC_AR = [
+    'Adalimumabe', 'Certolizumabe pegol', 'Etanercepte',
+    'Golimumabe', 'Infliximabe', 'Abatacepte', 'Tocilizumabe', 'Rituximabe',
+]
+FARMACOS_TC_AP = [
+    'Adalimumabe', 'Certolizumabe pegol', 'Etanercepte',
+    'Golimumabe', 'Infliximabe', 'Abatacepte', 'Secuquinumabe',
+]
+
 FARMACOS_SINTETICOS = [
     'Metotrexato',
     'Hidroxicloroquina',
@@ -439,6 +449,64 @@ def ap_manutencao():
                            sinteticos=FARMACOS_SINTETICOS,
                            cids=CID_AP,
                            today=datetime.date.today().strftime('%d.%m.%Y'))
+
+
+TEXTO_ITEM3_AR = (
+    'Já ter feito uso anterior dos medicamentos por pelo menos 3 a 6 meses: '
+    'metotrexato ( ) ou hidroxicloroquina ( ) ou sulfassalazina ( ) ou leflunomida ( ), '
+    'de forma isolada ou em associação.'
+)
+TEXTO_ITEM3_AP = (
+    'Já ter feito uso anterior dos medicamentos: metotrexato ( ) ou sulfassalazina ( ) '
+    'ou leflunomida ( ), de forma isolada ou em associação; '
+    'pelo menos dois anti-inflamatórios não esteroidais ( ).'
+)
+
+
+@app.route('/tc/ar', methods=['GET', 'POST'])
+def tc_ar():
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        return render_template('tc_print.html',
+            doenca='Artrite Reumatoide',
+            nome_paciente=data.get('nome_paciente', ''),
+            idade=data.get('idade', ''),
+            sexo=data.get('sexo', 'Feminino'),
+            cid10=data.get('cid10', ''),
+            data=data.get('data', datetime.date.today().strftime('%d/%m/%Y')),
+            farmaco=data.get('farmaco', ''),
+            farmacos_lista=FARMACOS_TC_AR,
+            doctor=DOCTOR,
+            texto_item3=TEXTO_ITEM3_AR,
+        )
+    return render_template('tc_ar.html',
+        farmacos=FARMACOS_TC_AR,
+        cids=CID_AR,
+        today=datetime.date.today().strftime('%d/%m/%Y'),
+    )
+
+
+@app.route('/tc/ap', methods=['GET', 'POST'])
+def tc_ap():
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        return render_template('tc_print.html',
+            doenca='Artrite Psoriásica',
+            nome_paciente=data.get('nome_paciente', ''),
+            idade=data.get('idade', ''),
+            sexo=data.get('sexo', 'Feminino'),
+            cid10=data.get('cid10', ''),
+            data=data.get('data', datetime.date.today().strftime('%d/%m/%Y')),
+            farmaco=data.get('farmaco', ''),
+            farmacos_lista=FARMACOS_TC_AP,
+            doctor=DOCTOR,
+            texto_item3=TEXTO_ITEM3_AP,
+        )
+    return render_template('tc_ap.html',
+        farmacos=FARMACOS_TC_AP,
+        cids=CID_AP,
+        today=datetime.date.today().strftime('%d/%m/%Y'),
+    )
 
 
 if __name__ == '__main__':

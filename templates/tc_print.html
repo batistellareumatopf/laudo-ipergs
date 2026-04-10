@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Termo de Consentimento — {{ doenca }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            color: #000;
+            background: #fff;
+            padding: 20px;
+        }
+        .container { max-width: 700px; margin: 0 auto; }
+
+        /* Botão de impressão — some ao imprimir */
+        .print-btn {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .print-btn button {
+            background: #0d6efd;
+            color: #fff;
+            border: none;
+            padding: 10px 32px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .print-btn button:hover { background: #0a58ca; }
+
+        h1 {
+            text-align: center;
+            font-size: 13pt;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        h2 {
+            text-align: center;
+            font-size: 12pt;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+        p { margin-bottom: 12px; line-height: 1.6; text-align: justify; }
+
+        .field {
+            display: inline;
+            border-bottom: 1px solid #000;
+            min-width: 120px;
+            font-weight: bold;
+        }
+        .field-blank {
+            display: inline-block;
+            border-bottom: 1px solid #000;
+            min-width: 120px;
+        }
+
+        .cb { display: inline; margin-right: 2px; }
+        .cb-marked { font-weight: bold; }
+        .cb-opt { margin-right: 8px; }
+
+        hr { border: none; border-top: 1px solid #000; margin: 16px 0; }
+
+        .assinatura-bloco { margin-top: 24px; }
+        .linha-assinatura {
+            border-bottom: 1px solid #000;
+            margin-bottom: 4px;
+            height: 28px;
+        }
+        .assinatura-label { font-size: 9pt; color: #333; margin-bottom: 12px; }
+
+        .rodape {
+            margin-top: 20px;
+            font-size: 9pt;
+            font-style: italic;
+            text-align: justify;
+            border-top: 1px solid #ccc;
+            padding-top: 8px;
+        }
+
+        @media print {
+            .print-btn { display: none; }
+            body { padding: 0; }
+            @page { margin: 1.5cm 2cm; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="print-btn">
+        <button onclick="window.print()">&#128438; Imprimir / Salvar PDF</button>
+    </div>
+
+    <h1>Termo de Consentimento Esclarecido e Informado para Tratamento</h1>
+    <h2>{{ doenca }}</h2>
+
+    <p>
+        Através deste documento, eu <span class="field">{{ nome_paciente }}</span>
+        ou meu responsável legal, <span class="field-blank" style="min-width:200px;">&nbsp;</span>, declaro que:
+    </p>
+
+    <p>
+        <strong>1.</strong> Autorizo meu tratamento com o medicamento
+        {% for f in farmacos_lista %}
+            <span class="cb-opt">
+                {% if f == farmaco %}
+                    <strong>[X] {{ f }}</strong>
+                {% else %}
+                    ( ) {{ f }}
+                {% endif %}
+            </span>
+        {% endfor %}
+        , prescrito pelo(a) meu(minha) médico(a) assistente,
+        Dr(a) <span class="field">{{ doctor.nome }}</span>
+        CRM-RS <span class="field">{{ doctor.crm }}</span>
+        para o tratamento de {{ doenca }}.
+        CID-10: <span class="field">{{ cid10 }}</span>.
+    </p>
+
+    <p>
+        <strong>2.</strong> Ter sido informado(a) claramente sobre benefícios, riscos, contraindicações
+        e principais eventos adversos relacionados ao tratamento prescrito.
+    </p>
+
+    <p>
+        <strong>3.</strong> {{ texto_item3 }}
+    </p>
+
+    <p>
+        Declaro, assim, ter entendido e concordado com todos os termos deste consentimento esclarecido
+        e informado, de forma espontânea e por decisão compartilhada minha e com meu(minha) médico(a).
+    </p>
+
+    <hr>
+
+    <p>
+        Nome do beneficiário: <span class="field">{{ nome_paciente }}</span>
+    </p>
+    <p>
+        Documento de identidade: <span class="field-blank" style="min-width:140px;">&nbsp;</span>
+        &nbsp;&nbsp; Sexo:
+        {% if sexo == 'Feminino' %}<strong>[X] Feminino</strong> &nbsp; ( ) Masculino
+        {% else %}( ) Feminino &nbsp; <strong>[X] Masculino</strong>{% endif %}
+        &nbsp;&nbsp; Idade: <span class="field">{{ idade }}</span>
+    </p>
+    <p>
+        Endereço: <span class="field-blank" style="min-width:180px;">&nbsp;</span>
+        &nbsp; Cidade: <span class="field-blank" style="min-width:100px;">&nbsp;</span>
+        &nbsp; Telefone: <span class="field-blank" style="min-width:100px;">&nbsp;</span>
+    </p>
+    <p>
+        Responsável legal (quando for o caso): <span class="field-blank" style="min-width:260px;">&nbsp;</span>
+    </p>
+    <p>
+        Documento de identidade do responsável legal: <span class="field-blank" style="min-width:160px;">&nbsp;</span>
+    </p>
+
+    <div class="assinatura-bloco">
+        <div class="linha-assinatura"></div>
+        <div class="assinatura-label">Assinatura do paciente ou responsável legal</div>
+
+        <p>
+            Médico responsável: <span class="field">Dr. {{ doctor.nome }}</span>
+            &nbsp;&nbsp; CRM-RS: <span class="field">{{ doctor.crm }}</span>
+        </p>
+        <p>
+            Cidade: <span class="field-blank" style="min-width:160px;">&nbsp;</span>
+            &nbsp;&nbsp; Telefone: <span class="field">{{ doctor.telefone }}</span>
+        </p>
+
+        <div class="linha-assinatura" style="margin-top:24px;"></div>
+        <div class="assinatura-label">Assinatura e carimbo do médico</div>
+
+        <p>Data: <span class="field">{{ data }}</span></p>
+    </div>
+
+    <div class="rodape">
+        Observação: O preenchimento completo deste termo e sua respectiva assinatura são imprescindíveis
+        para autorização do tratamento inicial prescrito e se troca de medicamento imunobiológico.
+    </div>
+
+</div>
+</body>
+</html>

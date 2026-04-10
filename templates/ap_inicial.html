@@ -141,7 +141,7 @@
         <div class="card-body row g-3">
             <div class="col-md-3">
                 <label class="form-label">Índice utilizado</label>
-                <select name="indice_tipo" class="form-select">
+                <select name="indice_tipo" class="form-select" id="indice_tipo">
                     <option value="3. ASDAS">ASDAS</option>
                     <option value="4. BASDAI">BASDAI</option>
                     <option value="1. DAS 28">DAS28</option>
@@ -150,15 +150,48 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label">PCR (mg/dL)</label>
-                <input type="text" name="pcr" class="form-control" placeholder="Ex: 0.8 ou NR">
+                <input type="text" name="pcr" id="pcr_val" class="form-control calc-field" placeholder="Ex: 0.8 ou NR">
             </div>
             <div class="col-md-3">
                 <label class="form-label">VSG/VHS (mm/h)</label>
-                <input type="text" name="vsg" class="form-control" placeholder="Ex: 17">
+                <input type="text" name="vsg" id="vsg_val" class="form-control calc-field" placeholder="Ex: 17">
             </div>
+
+            <!-- Campos ASDAS -->
+            <div id="asdas_campos" class="col-12 row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Dor dorsal (NRS 0–10)</label>
+                    <input type="number" name="dor_dorsal" id="dor_dorsal" class="form-control calc-field" placeholder="0–10" min="0" max="10" step="0.5">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Rigidez matinal (NRS 0–10)</label>
+                    <input type="number" name="rigidez" id="rigidez" class="form-control calc-field" placeholder="0–10" min="0" max="10" step="0.5">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Avaliação geral (NRS 0–10)</label>
+                    <input type="number" name="avaliacao_geral" id="avaliacao_geral" class="form-control calc-field" placeholder="0–10" min="0" max="10" step="0.5">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Art. periféricas doloridas (0–10)</label>
+                    <input type="number" name="art_perifericas" id="art_perifericas" class="form-control calc-field" placeholder="0–10" min="0" max="10">
+                </div>
+            </div>
+
+            <!-- Calculadora automática -->
+            <div class="col-12">
+                <div id="calc_box" class="p-3 rounded" style="background:#eef4ff; border-left:4px solid #0d6efd;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-calculator-fill text-primary"></i>
+                        <strong class="text-primary" id="calc_titulo">ASDAS</strong>
+                    </div>
+                    <div id="calc_resultado" class="fs-5 fw-bold text-dark">—</div>
+                    <div id="calc_detalhe" class="text-muted small mt-1"></div>
+                </div>
+            </div>
+
             <div class="col-md-3">
                 <label class="form-label">Valor do índice</label>
-                <input type="text" name="valor_indice" class="form-control" placeholder="Ex: 4.8">
+                <input type="text" name="valor_indice" id="valor_indice" class="form-control fw-bold fs-5" placeholder="automático">
             </div>
 
             <!-- CASPAR -->
@@ -314,5 +347,71 @@ toggleSection('rx_maos_sel', 'rx_maos_detalhes');
 toggleSection('rx_axial_sel', 'rx_axial_detalhes');
 toggleSection('rmn_eco_sel', 'rmn_eco_detalhes');
 toggleSection('rmn_sacro_sel', 'rmn_sacro_detalhes');
+
+function badgeASDAS(v) {
+    if (v < 1.3)  return `<span class="badge bg-success ms-2">Remissão &lt;1.3</span>`;
+    if (v < 2.1)  return `<span class="badge bg-info text-dark ms-2">Baixa &lt;2.1</span>`;
+    if (v <= 3.5) return `<span class="badge bg-warning text-dark ms-2">Alta ≤3.5</span>`;
+    return `<span class="badge bg-danger ms-2">Muito Alta &gt;3.5</span>`;
+}
+
+function calcAP() {
+    const indice  = document.getElementById('indice_tipo').value;
+    const pcrRaw  = document.getElementById('pcr_val').value.trim();
+    const vsgRaw  = document.getElementById('vsg_val').value.trim();
+    const pcrDL   = parseFloat(pcrRaw);
+    const vsg     = parseFloat(vsgRaw);
+    const dor     = parseFloat(document.getElementById('dor_dorsal').value);
+    const rig     = parseFloat(document.getElementById('rigidez').value);
+    const aval    = parseFloat(document.getElementById('avaliacao_geral').value);
+    const art     = parseFloat(document.getElementById('art_perifericas').value);
+
+    const res    = document.getElementById('calc_resultado');
+    const det    = document.getElementById('calc_detalhe');
+    const titulo = document.getElementById('calc_titulo');
+    const campo  = document.getElementById('valor_indice');
+    const asdasCampos = document.getElementById('asdas_campos');
+
+    let valor = null;
+    let detalhe = '';
+
+    if (indice === '3. ASDAS') {
+        titulo.textContent = 'ASDAS';
+        asdasCampos.style.display = 'flex';
+        let pcrVal = null, vsgVal = null;
+
+        if (!isNaN(dor) && !isNaN(rig) && !isNaN(aval) && !isNaN(art) && !isNaN(pcrDL)) {
+            const pcrL = pcrDL * 10;
+            pcrVal = 0.121*dor + 0.058*rig + 0.110*aval + 0.073*art + 0.579*Math.log(pcrL+1);
+            pcrVal = Math.round(pcrVal * 100) / 100;
+        }
+        if (!isNaN(dor) && !isNaN(rig) && !isNaN(aval) && !isNaN(art) && !isNaN(vsg) && vsg > 0) {
+            vsgVal = 0.079*dor + 0.069*rig + 0.113*aval + 0.086*art + 0.293*Math.sqrt(vsg);
+            vsgVal = Math.round(vsgVal * 100) / 100;
+        }
+        if (pcrVal !== null || vsgVal !== null) {
+            let partes = [];
+            if (pcrVal !== null) partes.push(`<span>PCR: <strong>${pcrVal}</strong>${badgeASDAS(pcrVal)}</span>`);
+            if (vsgVal !== null) partes.push(`<span>VSG: <strong>${vsgVal}</strong>${badgeASDAS(vsgVal)}</span>`);
+            res.innerHTML = partes.join('<span class="mx-3 text-muted">|</span>');
+            detalhe = 'ASDAS-PCR: 0.121×dor + 0.058×rig + 0.110×aval + 0.073×art + 0.579×ln(PCR_mgL+1)';
+            valor = pcrVal ?? vsgVal;
+        } else {
+            res.innerHTML = '<span class="text-muted">Preencha os 4 campos NRS e PCR ou VSG</span>';
+        }
+    } else {
+        titulo.textContent = indice.replace(/^\d+\. /, '');
+        asdasCampos.style.display = 'none';
+        res.innerHTML = '<span class="text-muted">Digite o valor do índice manualmente abaixo</span>';
+        detalhe = '';
+    }
+
+    det.innerHTML = detalhe;
+    if (valor !== null) campo.value = valor;
+}
+
+document.getElementById('indice_tipo').addEventListener('change', calcAP);
+document.querySelectorAll('.calc-field').forEach(el => el.addEventListener('input', calcAP));
+calcAP();
 </script>
 {% endblock %}

@@ -55,39 +55,52 @@
         <div class="card-body row g-3">
             <div class="col-md-3">
                 <label class="form-label">Índice utilizado</label>
-                <select name="indice_tipo" class="form-select">
+                <select name="indice_tipo" class="form-select" id="indice_tipo">
                     <option value="1. DAS 28">DAS28</option>
                     <option value="2. SDAI">SDAI</option>
                     <option value="3. CDAI">CDAI</option>
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Articulações com dor</label>
-                <input type="text" name="articulacoes_dor" class="form-control" placeholder="0-28">
+                <label class="form-label">Art. com dor (0–28)</label>
+                <input type="number" name="articulacoes_dor" id="tjc" class="form-control calc-field" placeholder="0–28" min="0" max="28">
             </div>
             <div class="col-md-2">
-                <label class="form-label">Articulações com edema</label>
-                <input type="text" name="articulacoes_edema" class="form-control" placeholder="0-28">
+                <label class="form-label">Art. com edema (0–28)</label>
+                <input type="number" name="articulacoes_edema" id="sjc" class="form-control calc-field" placeholder="0–28" min="0" max="28">
             </div>
             <div class="col-md-2">
-                <label class="form-label">EVA Paciente (0-10)</label>
-                <input type="text" name="eva_paciente" class="form-control" placeholder="0-10">
+                <label class="form-label">EVA Paciente (0–10)</label>
+                <input type="number" name="eva_paciente" id="eva_p" class="form-control calc-field" placeholder="0–10" min="0" max="10" step="0.5">
             </div>
             <div class="col-md-2">
-                <label class="form-label">EVA Médico (0-10)</label>
-                <input type="text" name="eva_medico" class="form-control" placeholder="0-10">
+                <label class="form-label">EVA Médico (0–10)</label>
+                <input type="number" name="eva_medico" id="eva_m" class="form-control calc-field" placeholder="0–10" min="0" max="10" step="0.5">
             </div>
             <div class="col-md-3">
                 <label class="form-label">PCR (mg/dL)</label>
-                <input type="text" name="pcr" class="form-control" placeholder="Ex: 0.8 ou NR">
+                <input type="text" name="pcr" id="pcr_val" class="form-control calc-field" placeholder="Ex: 0.8 ou NR">
             </div>
             <div class="col-md-3">
                 <label class="form-label">VSG/VHS (mm/h)</label>
-                <input type="text" name="vsg" class="form-control" placeholder="Ex: 25">
+                <input type="text" name="vsg" id="vsg_val" class="form-control calc-field" placeholder="Ex: 25">
             </div>
+
+            <!-- Calculadora automática -->
+            <div class="col-12">
+                <div id="calc_box" class="p-3 rounded" style="background:#eef4ff; border-left:4px solid #0d6efd;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-calculator-fill text-primary"></i>
+                        <strong class="text-primary" id="calc_titulo">DAS28</strong>
+                    </div>
+                    <div id="calc_resultado" class="fs-5 fw-bold text-dark">—</div>
+                    <div id="calc_detalhe" class="text-muted small mt-1"></div>
+                </div>
+            </div>
+
             <div class="col-md-3">
                 <label class="form-label">Valor do índice</label>
-                <input type="text" name="valor_indice" class="form-control" placeholder="Ex: 3.2">
+                <input type="text" name="valor_indice" id="valor_indice" class="form-control fw-bold fs-5" placeholder="automático">
             </div>
         </div>
     </div>
@@ -191,5 +204,96 @@
 document.getElementById('sintetico_sel').addEventListener('change', function() {
     document.getElementById('sintetico_detalhes').style.display = this.value === 'Sim' ? 'flex' : 'none';
 });
+
+function badgeAR(v, tipo) {
+    if (tipo === 'DAS28') {
+        if (v <= 2.6) return `<span class="badge bg-success ms-2">Remissão ≤2.6</span>`;
+        if (v <= 3.2) return `<span class="badge bg-info text-dark ms-2">Baixa ≤3.2</span>`;
+        if (v <= 5.1) return `<span class="badge bg-warning text-dark ms-2">Moderada ≤5.1</span>`;
+        return `<span class="badge bg-danger ms-2">Alta >5.1</span>`;
+    }
+    if (tipo === 'SDAI') {
+        if (v <= 3.3)  return `<span class="badge bg-success ms-2">Remissão ≤3.3</span>`;
+        if (v <= 11)   return `<span class="badge bg-info text-dark ms-2">Baixa ≤11</span>`;
+        if (v <= 26)   return `<span class="badge bg-warning text-dark ms-2">Moderada ≤26</span>`;
+        return `<span class="badge bg-danger ms-2">Alta >26</span>`;
+    }
+    if (tipo === 'CDAI') {
+        if (v <= 2.8)  return `<span class="badge bg-success ms-2">Remissão ≤2.8</span>`;
+        if (v <= 10)   return `<span class="badge bg-info text-dark ms-2">Baixa ≤10</span>`;
+        if (v <= 22)   return `<span class="badge bg-warning text-dark ms-2">Moderada ≤22</span>`;
+        return `<span class="badge bg-danger ms-2">Alta >22</span>`;
+    }
+    return '';
+}
+
+function calcAR() {
+    const indice = document.getElementById('indice_tipo').value;
+    const tjc    = parseFloat(document.getElementById('tjc').value);
+    const sjc    = parseFloat(document.getElementById('sjc').value);
+    const evaP   = parseFloat(document.getElementById('eva_p').value);
+    const evaM   = parseFloat(document.getElementById('eva_m').value);
+    const pcrRaw = document.getElementById('pcr_val').value.trim();
+    const vsgRaw = document.getElementById('vsg_val').value.trim();
+    const vsg    = parseFloat(vsgRaw);
+    const pcrDL  = parseFloat(pcrRaw);
+
+    const res    = document.getElementById('calc_resultado');
+    const det    = document.getElementById('calc_detalhe');
+    const titulo = document.getElementById('calc_titulo');
+    const campo  = document.getElementById('valor_indice');
+
+    let valor = null;
+    let detalhe = '';
+
+    if (indice === '1. DAS 28') {
+        titulo.textContent = 'DAS28';
+        let vsgVal = null, crpVal = null;
+        if (!isNaN(tjc) && !isNaN(sjc) && !isNaN(evaP) && !isNaN(vsg) && vsg > 0) {
+            vsgVal = 0.56*Math.sqrt(tjc) + 0.28*Math.sqrt(sjc) + 0.70*Math.log(vsg) + 0.014*(evaP*10);
+            vsgVal = Math.round(vsgVal * 100) / 100;
+        }
+        if (!isNaN(tjc) && !isNaN(sjc) && !isNaN(evaP) && !isNaN(pcrDL)) {
+            const pcrL = pcrDL * 10;
+            crpVal = 0.56*Math.sqrt(tjc) + 0.28*Math.sqrt(sjc) + 0.36*Math.log(pcrL+1) + 0.014*(evaP*10) + 0.96;
+            crpVal = Math.round(crpVal * 100) / 100;
+        }
+        if (vsgVal !== null || crpVal !== null) {
+            let partes = [];
+            if (vsgVal !== null) partes.push(`<span>VSG: <strong>${vsgVal}</strong>${badgeAR(vsgVal,'DAS28')}</span>`);
+            if (crpVal !== null) partes.push(`<span>PCR: <strong>${crpVal}</strong>${badgeAR(crpVal,'DAS28')}</span>`);
+            res.innerHTML = partes.join('<span class="mx-3 text-muted">|</span>');
+            detalhe = '0.56×√TJC + 0.28×√SJC + 0.70×ln(VSG) + 0.014×(EVA×10) &nbsp;|&nbsp; Variante PCR: +0.36×ln(PCR_mgL+1) + 0.96';
+            valor = vsgVal ?? crpVal;
+        } else {
+            res.innerHTML = '<span class="text-muted">Preencha TJC, SJC, EVA Paciente e VSG ou PCR</span>';
+        }
+    } else if (indice === '2. SDAI') {
+        titulo.textContent = 'SDAI';
+        if (!isNaN(tjc) && !isNaN(sjc) && !isNaN(evaP) && !isNaN(evaM) && !isNaN(pcrDL)) {
+            valor = Math.round((tjc + sjc + evaP + evaM + pcrDL) * 10) / 10;
+            res.innerHTML = `<strong>${valor}</strong>${badgeAR(valor,'SDAI')}`;
+            detalhe = `TJC(${tjc}) + SJC(${sjc}) + EVA-P(${evaP}) + EVA-M(${evaM}) + PCR_mg/dL(${pcrDL})`;
+        } else {
+            res.innerHTML = '<span class="text-muted">Preencha TJC, SJC, EVA Paciente, EVA Médico e PCR</span>';
+        }
+    } else if (indice === '3. CDAI') {
+        titulo.textContent = 'CDAI';
+        if (!isNaN(tjc) && !isNaN(sjc) && !isNaN(evaP) && !isNaN(evaM)) {
+            valor = Math.round((tjc + sjc + evaP + evaM) * 10) / 10;
+            res.innerHTML = `<strong>${valor}</strong>${badgeAR(valor,'CDAI')}`;
+            detalhe = `TJC(${tjc}) + SJC(${sjc}) + EVA-P(${evaP}) + EVA-M(${evaM})`;
+        } else {
+            res.innerHTML = '<span class="text-muted">Preencha TJC, SJC, EVA Paciente e EVA Médico</span>';
+        }
+    }
+
+    det.innerHTML = detalhe;
+    if (valor !== null) campo.value = valor;
+}
+
+document.getElementById('indice_tipo').addEventListener('change', calcAR);
+document.querySelectorAll('.calc-field').forEach(el => el.addEventListener('input', calcAR));
+calcAR();
 </script>
 {% endblock %}

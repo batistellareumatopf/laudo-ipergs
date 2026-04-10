@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}AP — Manutenção{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+    <a href="/" class="btn btn-outline-secondary btn-sm me-3"><i class="bi bi-arrow-left"></i></a>
+    <div>
+        <span class="badge bg-info text-dark me-2">AP</span>
+        <h4 class="d-inline fw-bold">Manutenção — Artrite Psoriásica</h4>
+    </div>
+</div>
+
+<form method="POST" action="/ap/manutencao">
+
+    <!-- II - Paciente -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">II — Dados do Paciente</div>
+        <div class="card-body row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Nome completo <span class="required-star">*</span></label>
+                <input type="text" name="nome_paciente" class="form-control" required placeholder="Nome do paciente">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Idade</label>
+                <input type="text" name="idade" class="form-control" placeholder="Ex: 45 a">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Sexo</label>
+                <select name="sexo" class="form-select">
+                    <option value="Feminino">Feminino</option>
+                    <option value="Masculino">Masculino</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Início do tratamento</label>
+                <input type="text" name="inicio_tratamento" class="form-control" placeholder="Ex: 2022 ou mar/2022">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">CID-10</label>
+                <input type="text" name="cid10" class="form-control" list="cid_list" placeholder="M07.3">
+                <datalist id="cid_list">
+                    {% for c in cids %}<option value="{{ c }}">{% endfor %}
+                </datalist>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Peso</label>
+                <input type="text" name="peso" class="form-control" placeholder="Ex: 70 kg">
+            </div>
+        </div>
+    </div>
+
+    <!-- III - Atividade -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">III — Atividade da Doença</div>
+        <div class="card-body row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Índice utilizado</label>
+                <select name="indice_tipo" class="form-select">
+                    <option value="3. ASDAS">ASDAS</option>
+                    <option value="4. BASDAI">BASDAI</option>
+                    <option value="1. DAS 28">DAS28</option>
+                    <option value="2. SDAI">SDAI</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">PCR (mg/dL)</label>
+                <input type="text" name="pcr" class="form-control" placeholder="Ex: 0.8 ou NR">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">VSG/VHS (mm/h)</label>
+                <input type="text" name="vsg" class="form-control" placeholder="Ex: 33">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Valor do índice</label>
+                <input type="text" name="valor_indice" class="form-control" placeholder="Ex: 3.9">
+            </div>
+        </div>
+    </div>
+
+    <!-- IV - Evolução -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">IV — Evolução Clínica</div>
+        <div class="card-body row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Boa resposta terapêutica?</label>
+                <select name="boa_resposta" class="form-select">
+                    <option value="Sim">Sim</option>
+                    <option value="Não">Não</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Problema relacionado ao medicamento (PRM)?</label>
+                <select name="prm" class="form-select" id="prm_sel">
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+            </div>
+            <div id="prm_detalhes" class="col-md-8" style="display:none">
+                <label class="form-label">Descrever PRM</label>
+                <input type="text" name="descricao_prm" class="form-control" placeholder="Descrever o problema...">
+            </div>
+        </div>
+    </div>
+
+    <!-- V - Recomendação -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">V — Recomendação</div>
+        <div class="card-body row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Manter o tratamento?</label>
+                <select name="manter" class="form-select">
+                    <option value="Sim">Sim</option>
+                    <option value="Não">Não</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Modificar o tratamento?</label>
+                <select name="modificar" class="form-select">
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Fármaco <span class="required-star">*</span></label>
+                <input type="text" name="farmaco" class="form-control" list="farmacos_list" required placeholder="Selecione ou digite">
+                <datalist id="farmacos_list">
+                    {% for f in farmacos %}<option value="{{ f }}">{% endfor %}
+                </datalist>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Posologia</label>
+                <input type="text" name="posologia" class="form-control" placeholder="Ex: 300 mg semanal por 5 semanas...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fármaco sintético associado?</label>
+                <select name="sintetico_associado" class="form-select" id="sintetico_sel">
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+            </div>
+            <div id="sintetico_detalhes" style="display:none" class="col-12 row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Qual sintético?</label>
+                    <input type="text" name="qual_sintetico" class="form-control" list="sinteticos_list" placeholder="Ex: Metotrexato">
+                    <datalist id="sinteticos_list">
+                        {% for s in sinteticos %}<option value="{{ s }}">{% endfor %}
+                    </datalist>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Posologia do sintético</label>
+                    <input type="text" name="posologia_sintetico" class="form-control" placeholder="Ex: 15 mg/sem">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VI - Observações -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">VI — Observações e Data</div>
+        <div class="card-body row g-3">
+            <div class="col-md-10">
+                <label class="form-label">Observações</label>
+                <textarea name="observacoes" class="form-control" rows="3" placeholder="Situações relevantes não previstas no protocolo..."></textarea>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Data do laudo</label>
+                <input type="text" name="data" class="form-control" value="{{ today }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <button type="submit" class="btn btn-info btn-gerar">
+            <i class="bi bi-file-earmark-arrow-down me-2"></i>Gerar Laudo Excel
+        </button>
+    </div>
+
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('prm_sel').addEventListener('change', function() {
+    document.getElementById('prm_detalhes').style.display = this.value === 'Sim' ? 'block' : 'none';
+});
+document.getElementById('sintetico_sel').addEventListener('change', function() {
+    document.getElementById('sintetico_detalhes').style.display = this.value === 'Sim' ? 'flex' : 'none';
+});
+</script>
+{% endblock %}

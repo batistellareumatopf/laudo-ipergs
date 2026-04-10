@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% block title %}AP — Solicitação Inicial{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+    <a href="/" class="btn btn-outline-secondary btn-sm me-3"><i class="bi bi-arrow-left"></i></a>
+    <div>
+        <span class="badge bg-warning text-dark me-2">AP</span>
+        <h4 class="d-inline fw-bold">Solicitação Inicial — Artrite Psoriásica</h4>
+    </div>
+</div>
+
+<form method="POST" action="/ap/inicial">
+
+    <!-- II - Paciente -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">II — Identificação do Paciente</div>
+        <div class="card-body row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Nome completo <span class="required-star">*</span></label>
+                <input type="text" name="nome_paciente" class="form-control" required placeholder="Nome do paciente">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Idade</label>
+                <input type="text" name="idade" class="form-control" placeholder="Ex: 45 a">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Sexo</label>
+                <select name="sexo" class="form-select">
+                    <option value="Feminino">Feminino</option>
+                    <option value="Masculino">Masculino</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Telefone</label>
+                <input type="text" name="telefone_paciente" class="form-control" placeholder="54 9...">
+            </div>
+        </div>
+    </div>
+
+    <!-- III - Histórico -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">III — Histórico da Doença</div>
+        <div class="card-body row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Data do diagnóstico</label>
+                <input type="text" name="data_diagnostico" class="form-control" placeholder="Ex: abril de 2024">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">CID-10</label>
+                <input type="text" name="cid10" class="form-control" list="cid_list" placeholder="M07.3">
+                <datalist id="cid_list">
+                    {% for c in cids %}<option value="{{ c }}">{% endfor %}
+                </datalist>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Valor FR</label>
+                <input type="text" name="fr_valor" class="form-control" placeholder="Ex: NR ou 12 UI/mL">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Formação óssea justa-articular</label>
+                <select name="formacao_ossea" class="form-select">
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+            </div>
+
+            <div class="col-12"><small class="text-muted fw-semibold">3.3 RX de Mãos e Pés</small></div>
+            <div class="col-md-3">
+                <label class="form-label">Realizado?</label>
+                <select name="rx_maos_realizado" class="form-select" id="rx_maos_sel">
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+            </div>
+            <div id="rx_maos_detalhes" class="col-12 row g-3" style="display:none">
+                <div class="col-md-3"><label class="form-label">Erosões</label>
+                    <select name="rx_maos_erosoes" class="form-select"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+                <div class="col-md-4"><label class="form-label">Diminuição de espaços</label>
+                    <select name="rx_maos_diminuicao" class="form-select"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+            </div>
+
+            <div class="col-12"><small class="text-muted fw-semibold">3.3 Radiografias de Eixo Axial</small></div>
+            <div class="col-md-3">
+                <label class="form-label">Realizado?</label>
+                <select name="rx_axial_realizado" class="form-select" id="rx_axial_sel">
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+            </div>
+            <div id="rx_axial_detalhes" class="col-12 row g-3" style="display:none">
+                <div class="col-md-3"><label class="form-label">Sacroileíte</label>
+                    <select name="sacroileite" class="form-select"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+                <div class="col-md-3"><label class="form-label">Sindesmófitos vertebrais</label>
+                    <select name="sindesmofitos" class="form-select"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+            </div>
+
+            <div class="col-12"><small class="text-muted fw-semibold">3.4 RMN ou Ecografia de Mãos</small></div>
+            <div class="col-md-3">
+                <label class="form-label">Realizado?</label>
+                <select name="rmn_eco_realizado" class="form-select" id="rmn_eco_sel">
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+            </div>
+            <div id="rmn_eco_detalhes" class="col-12 row g-3" style="display:none">
+                <div class="col-md-2"><label class="form-label">Sinovite</label>
+                    <select name="sinovite" class="form-select"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+                <div class="col-md-3"><label class="form-label">Tenossinovite</label>
+                    <select name="tenossinovite" class="form-select"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+                <div class="col-md-3"><label class="form-label">Entesopatia</label>
+                    <select name="entesopatia" class="form-select"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+            </div>
+
+            <div class="col-12"><small class="text-muted fw-semibold">3.5 RMN Sacroilíacas ou Coluna Vertebral</small></div>
+            <div class="col-md-3">
+                <label class="form-label">Realizado?</label>
+                <select name="rmn_sacro_realizado" class="form-select" id="rmn_sacro_sel">
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+            </div>
+            <div id="rmn_sacro_detalhes" class="col-12 row g-3" style="display:none">
+                <div class="col-md-3"><label class="form-label">Edema Ósseo</label>
+                    <select name="edema_osseo" class="form-select"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- IV - Atividade -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">IV — Atividade da Doença</div>
+        <div class="card-body row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Índice utilizado</label>
+                <select name="indice_tipo" class="form-select">
+                    <option value="3. ASDAS">ASDAS</option>
+                    <option value="4. BASDAI">BASDAI</option>
+                    <option value="1. DAS 28">DAS28</option>
+                    <option value="2. SDAI">SDAI</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">PCR (mg/dL)</label>
+                <input type="text" name="pcr" class="form-control" placeholder="Ex: 0.8 ou NR">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">VSG/VHS (mm/h)</label>
+                <input type="text" name="vsg" class="form-control" placeholder="Ex: 17">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Valor do índice</label>
+                <input type="text" name="valor_indice" class="form-control" placeholder="Ex: 4.8">
+            </div>
+
+            <!-- CASPAR -->
+            <div class="col-12 mt-2">
+                <div class="sub-card">
+                    <h6 class="fw-semibold text-primary mb-3">Critérios de Classificação CASPAR</h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Psoríase atual</label>
+                            <select name="psoriase_atual" class="form-select form-select-sm">
+                                <option value="Não">Não</option>
+                                <option value="Sim">Sim (2 pts)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">História pessoal de psoríase</label>
+                            <select name="hist_pessoal" class="form-select form-select-sm">
+                                <option value="Não">Não</option>
+                                <option value="Sim">Sim (1 pt)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">História familiar de psoríase</label>
+                            <select name="hist_familiar" class="form-select form-select-sm">
+                                <option value="Não">Não</option>
+                                <option value="Sim">Sim (1 pt)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Distrofia ungueal psoríaca</label>
+                            <select name="distrofia_ungueal" class="form-select form-select-sm">
+                                <option value="Não">Não</option>
+                                <option value="Sim">Sim (1 pt)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Fator reumatoide negativo</label>
+                            <select name="fr_negativo" class="form-select form-select-sm">
+                                <option value="Sim">Sim — FR Negativo (1 pt)</option>
+                                <option value="Não">Não — FR Positivo (0 pts)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Dactilite (atual ou história)</label>
+                            <select name="dactilite" class="form-select form-select-sm">
+                                <option value="Não">Não</option>
+                                <option value="Sim">Sim (1 pt)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Formação óssea justa-articular (RX simples)</label>
+                            <select name="formacao_ossea_rx" class="form-select form-select-sm">
+                                <option value="Não">Não</option>
+                                <option value="Sim">Sim (1 pt)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- V - Tratamento anterior -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">V — Histórico do Tratamento</div>
+        <div class="card-body">
+            {% for i in range(1, 4) %}
+            <div class="sub-card">
+                <div class="row g-2 align-items-end">
+                    <div class="col-1 text-center text-muted fw-bold">{{ i }}</div>
+                    <div class="col-md-4">
+                        <label class="form-label">Fármaco</label>
+                        <input type="text" name="farmaco_ant_{{ i }}" class="form-control" list="sinteticos_list" placeholder="Ex: Metotrexato">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Posologia</label>
+                        <input type="text" name="posologia_ant_{{ i }}" class="form-control" placeholder="Ex: 20 mg/sem">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Período</label>
+                        <input type="text" name="periodo_ant_{{ i }}" class="form-control" placeholder="jan/23 – dez/24">
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <datalist id="sinteticos_list">
+                {% for s in sinteticos %}<option value="{{ s }}">{% endfor %}
+            </datalist>
+        </div>
+    </div>
+
+    <!-- VI - Terapia proposta -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">VI — Terapia Imunobiológica Proposta</div>
+        <div class="card-body row g-3">
+            <div class="col-md-5">
+                <label class="form-label">Fármaco <span class="required-star">*</span></label>
+                <input type="text" name="farmaco_proposto" class="form-control" list="farmacos_list" required placeholder="Selecione ou digite">
+                <datalist id="farmacos_list">
+                    {% for f in farmacos %}<option value="{{ f }}">{% endfor %}
+                </datalist>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Posologia</label>
+                <input type="text" name="posologia_proposta" class="form-control" placeholder="Ex: 40 mg a cada 14 dias">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Peso</label>
+                <input type="text" name="peso" class="form-control" placeholder="Ex: 70 kg">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">RX tórax e PPD avaliados?</label>
+                <select name="ppd_rx" class="form-select">
+                    <option value="Sim">Sim</option>
+                    <option value="Não">Não</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- VII - Observações -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">VII — Observações e Data</div>
+        <div class="card-body row g-3">
+            <div class="col-md-10">
+                <label class="form-label">Observações clínicas</label>
+                <textarea name="observacoes" class="form-control" rows="3" placeholder="Descreva situações relevantes não previstas no protocolo..."></textarea>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Data do laudo</label>
+                <input type="text" name="data" class="form-control" value="{{ today }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <button type="submit" class="btn btn-warning btn-gerar text-dark">
+            <i class="bi bi-file-earmark-arrow-down me-2"></i>Gerar Laudo Excel
+        </button>
+    </div>
+
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleSection(selectId, detailsId) {
+    document.getElementById(selectId).addEventListener('change', function() {
+        document.getElementById(detailsId).style.display = this.value === 'Sim' ? 'flex' : 'none';
+    });
+}
+toggleSection('rx_maos_sel', 'rx_maos_detalhes');
+toggleSection('rx_axial_sel', 'rx_axial_detalhes');
+toggleSection('rmn_eco_sel', 'rmn_eco_detalhes');
+toggleSection('rmn_sacro_sel', 'rmn_sacro_detalhes');
+</script>
+{% endblock %}

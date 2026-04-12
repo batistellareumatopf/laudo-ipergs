@@ -49,6 +49,10 @@ FARMACOS_TC_AP = [
     'Adalimumabe', 'Certolizumabe pegol', 'Etanercepte',
     'Golimumabe', 'Infliximabe', 'Abatacepte', 'Secuquinumabe',
 ]
+FARMACOS_TC_EA = [
+    'Adalimumabe', 'Certolizumabe pegol', 'Etanercepte',
+    'Golimumabe', 'Infliximabe', 'Secuquinumabe', 'Ixequizumabe',
+]
 
 FARMACOS_SINTETICOS = [
     'Metotrexato',
@@ -60,6 +64,18 @@ FARMACOS_SINTETICOS = [
 
 CID_AR = ['M05.0', 'M05.1', 'M05.2', 'M05.3', 'M05.8', 'M05.9', 'M06.0', 'M06.1', 'M06.2', 'M06.8', 'M06.9', 'M08.0']
 CID_AP = ['M07.0', 'M07.1', 'M07.2', 'M07.3', 'M073']
+CID_EA = ['M45', 'M45.0', 'M46.0', 'M46.1', 'M46.2', 'M46.8', 'M46.9']
+
+FARMACOS_BIOLOGICOS_EA = [
+    'Adalimumabe 40mg',
+    'Adalimumabe biossimilar 40mg',
+    'Certolizumabe pegol 200mg',
+    'Etanercepte 50mg',
+    'Golimumabe 50mg SC',
+    'Infliximabe 100mg/10ml IV',
+    'Secuquinumabe 150mg SC',
+    'Ixequizumabe 80mg SC',
+]
 
 
 def wb_write(ws, coord, value):
@@ -330,6 +346,106 @@ def generate_ap_inicial(data):
     return buf
 
 
+def generate_ea(data):
+    tipo = data.get('tipo', 'Inicial')
+    if tipo == 'Manutencao':
+        wb = openpyxl.load_workbook(os.path.join(EXCEL_DIR, 'ea_manutencao.xlsx'))
+    else:
+        wb = openpyxl.load_workbook(os.path.join(EXCEL_DIR, 'ea_inicial.xlsx'))
+    ws = wb.active
+
+    wb_write(ws, 'C4', DOCTOR['nome'])
+    wb_write(ws, 'C5', DOCTOR['crm'])
+    wb_write(ws, 'E5', DOCTOR['especialidade'])
+    wb_write(ws, 'C6', DOCTOR['telefone'])
+
+    wb_write(ws, 'C8', data.get('nome_paciente', ''))
+    wb_write(ws, 'C9', data.get('idade', ''))
+    wb_write(ws, 'E9', data.get('sexo', ''))
+    wb_write(ws, 'C10', data.get('telefone_paciente', '') if tipo == 'Inicial' else data.get('inicio_tratamento', ''))
+    wb_write(ws, 'C11', data.get('cid10', ''))
+    wb_write(ws, 'C12', data.get('peso', ''))
+
+    if tipo == 'Inicial':
+        wb_write(ws, 'C14', data.get('data_diagnostico', ''))
+        wb_write(ws, 'C15', data.get('hlab27_resultado', ''))
+        wb_write(ws, 'C16', data.get('forma_doenca', ''))
+        wb_write(ws, 'C17', data.get('criterio_diagnostico', ''))
+
+        rx_sacro = data.get('rx_sacro_realizado', 'Não')
+        wb_write(ws, 'E20', sim_nao(rx_sacro))
+        if rx_sacro == 'Sim':
+            wb_write(ws, 'C21', data.get('sacroileite_grau', ''))
+
+        rmn_sacro = data.get('rmn_sacro_realizado', 'Não')
+        wb_write(ws, 'E22', sim_nao(rmn_sacro))
+        if rmn_sacro == 'Sim':
+            wb_write(ws, 'C23', sim_nao(data.get('rmn_edema_osseo', 'Não')))
+            wb_write(ws, 'E23', sim_nao(data.get('rmn_erosoes', 'Não')))
+            wb_write(ws, 'C24', sim_nao(data.get('rmn_esclerose', 'Não')))
+
+        rx_coluna = data.get('rx_coluna_realizado', 'Não')
+        wb_write(ws, 'E25', sim_nao(rx_coluna))
+        if rx_coluna == 'Sim':
+            wb_write(ws, 'C26', sim_nao(data.get('sindesmofitos', 'Não')))
+            wb_write(ws, 'E26', sim_nao(data.get('coluna_bambu', 'Não')))
+
+        wb_write(ws, 'C29', data.get('pcr', ''))
+        wb_write(ws, 'C30', data.get('vsg', ''))
+        wb_write(ws, 'C31', data.get('basdai_q1', ''))
+        wb_write(ws, 'C32', data.get('basdai_q2', ''))
+        wb_write(ws, 'C33', data.get('basdai_q3', ''))
+        wb_write(ws, 'C34', data.get('basdai_q4', ''))
+        wb_write(ws, 'C35', data.get('basdai_q5', ''))
+        wb_write(ws, 'C36', data.get('basdai_q6', ''))
+        wb_write(ws, 'C37', data.get('asdas_pga', ''))
+        wb_write(ws, 'C38', data.get('indice_tipo', ''))
+        wb_write(ws, 'C39', data.get('valor_indice', ''))
+
+        for i in range(1, 5):
+            row = 42 + i
+            farmaco = data.get(f'farmaco_ant_{i}', '')
+            if farmaco:
+                wb_write(ws, f'B{row}', farmaco)
+                wb_write(ws, f'C{row}', data.get(f'posologia_ant_{i}', ''))
+                wb_write(ws, f'E{row}', data.get(f'periodo_ant_{i}', ''))
+
+        wb_write(ws, 'C49', data.get('farmaco_proposto', ''))
+        wb_write(ws, 'C50', data.get('posologia_proposta', ''))
+        wb_write(ws, 'C51', sim_nao(data.get('ppd_rx', 'Não')))
+        wb_write(ws, 'B53', data.get('observacoes', ''))
+        wb_write(ws, 'C57', data.get('data', datetime.date.today().strftime('%d.%m.%Y')))
+
+    else:  # Manutenção
+        wb_write(ws, 'C14', data.get('indice_tipo', ''))
+        wb_write(ws, 'C15', data.get('pcr', ''))
+        wb_write(ws, 'C16', data.get('vsg', ''))
+        wb_write(ws, 'C17', data.get('basdai_q1', ''))
+        wb_write(ws, 'C18', data.get('basdai_q2', ''))
+        wb_write(ws, 'C19', data.get('basdai_q3', ''))
+        wb_write(ws, 'C20', data.get('basdai_q4', ''))
+        wb_write(ws, 'C21', data.get('basdai_q5', ''))
+        wb_write(ws, 'C22', data.get('basdai_q6', ''))
+        wb_write(ws, 'C23', data.get('asdas_pga', ''))
+        wb_write(ws, 'C24', data.get('valor_indice', ''))
+
+        wb_write(ws, 'C26', sim_nao(data.get('boa_resposta', 'Não')))
+        wb_write(ws, 'B28', data.get('descricao_falha', ''))
+
+        wb_write(ws, 'D30', sim_nao(data.get('manter', 'Não')))
+        wb_write(ws, 'D31', sim_nao(data.get('modificar', 'Não')))
+        wb_write(ws, 'D32', data.get('farmaco', ''))
+        wb_write(ws, 'D33', data.get('posologia', ''))
+
+        wb_write(ws, 'B35', data.get('observacoes', ''))
+        wb_write(ws, 'C37', data.get('data', datetime.date.today().strftime('%d.%m.%Y')))
+
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf
+
+
 def generate_ap_manutencao(data):
     wb = openpyxl.load_workbook(os.path.join(EXCEL_DIR, 'ap_manutencao.xlsx'))
     ws = wb.active
@@ -437,6 +553,58 @@ def ap_inicial():
                            today=datetime.date.today().strftime('%d.%m.%Y'))
 
 
+@app.route('/ea', methods=['GET', 'POST'])
+def ea():
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        buf = generate_ea(data)
+        nome = data.get('nome_paciente', 'paciente')
+        tipo = data.get('tipo', 'Inicial')
+        today = datetime.date.today().strftime('%Y%m%d')
+        prefix = 'EA_Inicial' if tipo == 'Inicial' else 'EA_Manutencao'
+        filename = make_filename(prefix, nome, today)
+        return send_file(buf, as_attachment=True, download_name=filename,
+                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    return render_template('ea.html',
+                           farmacos=FARMACOS_BIOLOGICOS_EA,
+                           cids=CID_EA,
+                           today=datetime.date.today().strftime('%d.%m.%Y'))
+
+
+@app.route('/ea/inicial', methods=['GET', 'POST'])
+def ea_inicial():
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        data['tipo'] = 'Inicial'
+        buf = generate_ea(data)
+        nome = data.get('nome_paciente', 'paciente')
+        today = datetime.date.today().strftime('%Y%m%d')
+        filename = make_filename('EA_Inicial', nome, today)
+        return send_file(buf, as_attachment=True, download_name=filename,
+                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    return render_template('ea_inicial.html',
+                           farmacos=FARMACOS_BIOLOGICOS_EA,
+                           cids=CID_EA,
+                           today=datetime.date.today().strftime('%d.%m.%Y'))
+
+
+@app.route('/ea/manutencao', methods=['GET', 'POST'])
+def ea_manutencao():
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        data['tipo'] = 'Manutencao'
+        buf = generate_ea(data)
+        nome = data.get('nome_paciente', 'paciente')
+        today = datetime.date.today().strftime('%Y%m%d')
+        filename = make_filename('EA_Manutencao', nome, today)
+        return send_file(buf, as_attachment=True, download_name=filename,
+                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    return render_template('ea_manutencao.html',
+                           farmacos=FARMACOS_BIOLOGICOS_EA,
+                           cids=CID_EA,
+                           today=datetime.date.today().strftime('%d.%m.%Y'))
+
+
 @app.route('/ap/manutencao', methods=['GET', 'POST'])
 def ap_manutencao():
     if request.method == 'POST':
@@ -516,6 +684,10 @@ TEXTO_ITEM3_AP = (
     'ou leflunomida ( ), de forma isolada ou em associação; '
     'pelo menos dois anti-inflamatórios não esteroidais ( ).'
 )
+TEXTO_ITEM3_EA = (
+    'Já ter feito uso anterior de pelo menos dois anti-inflamatórios não esteroidais (AINEs) ( ) '
+    'em doses plenas, por pelo menos 3 meses cada, sem resposta adequada ou com intolerância.'
+)
 
 
 @app.route('/tc/ar', methods=['GET', 'POST'])
@@ -560,6 +732,29 @@ def tc_ap():
     return render_template('tc_ap.html',
         farmacos=FARMACOS_TC_AP,
         cids=CID_AP,
+        today=datetime.date.today().strftime('%d/%m/%Y'),
+    )
+
+
+@app.route('/tc/ea', methods=['GET', 'POST'])
+def tc_ea():
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        return render_template('tc_print.html',
+            doenca='Espondilite Anquilosante',
+            nome_paciente=data.get('nome_paciente', ''),
+            idade=data.get('idade', ''),
+            sexo=data.get('sexo', 'Masculino'),
+            cid10=data.get('cid10', ''),
+            data=data.get('data', datetime.date.today().strftime('%d/%m/%Y')),
+            farmaco=data.get('farmaco', ''),
+            farmacos_lista=FARMACOS_TC_EA,
+            doctor=DOCTOR,
+            texto_item3=TEXTO_ITEM3_EA,
+        )
+    return render_template('tc_ea.html',
+        farmacos=FARMACOS_TC_EA,
+        cids=CID_EA,
         today=datetime.date.today().strftime('%d/%m/%Y'),
     )
 

@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+{% block title %}EA — Espondilite Anquilosante{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+    <a href="/" class="btn btn-outline-secondary btn-sm me-3"><i class="bi bi-arrow-left"></i></a>
+    <div>
+        <span class="badge bg-danger me-2">EA</span>
+        <h4 class="d-inline fw-bold">Espondilite Anquilosante</h4>
+    </div>
+</div>
+
+<form method="POST" action="/ea">
+
+    <!-- Tipo de Laudo -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">I — Tipo de Laudo</div>
+        <div class="card-body row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Tipo <span class="required-star">*</span></label>
+                <select name="tipo" class="form-select" id="tipo_laudo" required>
+                    <option value="Inicial">Solicitação Inicial</option>
+                    <option value="Manutencao">Manutenção / Continuidade</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- II - Paciente -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">II — Identificação do Paciente</div>
+        <div class="card-body row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Nome completo <span class="required-star">*</span></label>
+                <input type="text" name="nome_paciente" class="form-control" required placeholder="Nome do paciente">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Idade</label>
+                <input type="text" name="idade" class="form-control" placeholder="Ex: 35 a">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Sexo</label>
+                <select name="sexo" class="form-select">
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Telefone</label>
+                <input type="text" name="telefone_paciente" class="form-control" placeholder="54 9...">
+            </div>
+            <div class="col-md-3 campo-manutencao" style="display:none">
+                <label class="form-label">Início do tratamento</label>
+                <input type="text" name="inicio_tratamento" class="form-control" placeholder="Ex: mar/2021">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">CID-10</label>
+                <input type="text" name="cid10" class="form-control" list="cid_list" placeholder="M45">
+                <datalist id="cid_list">{% for c in cids %}<option value="{{ c }}">{% endfor %}</datalist>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Peso</label>
+                <input type="text" name="peso" class="form-control" placeholder="Ex: 80 kg">
+            </div>
+        </div>
+    </div>
+
+    <!-- III - Histórico da Doença (Inicial) -->
+    <div class="card section-card shadow-sm campo-inicial">
+        <div class="card-header">III — Histórico da Doença</div>
+        <div class="card-body row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Data do diagnóstico</label>
+                <input type="text" name="data_diagnostico" class="form-control" placeholder="Ex: março de 2022">
+            </div>
+
+            <div class="col-12"><hr class="my-1"><small class="text-muted fw-semibold">3.1 HLA-B27</small></div>
+            <div class="col-md-3">
+                <label class="form-label">Resultado HLA-B27</label>
+                <select name="hlab27_resultado" class="form-select">
+                    <option value="Positivo">Positivo</option>
+                    <option value="Negativo">Negativo</option>
+                    <option value="Não realizado">Não realizado</option>
+                </select>
+            </div>
+
+            <div class="col-12"><small class="text-muted fw-semibold">3.2 Forma da doença</small></div>
+            <div class="col-md-3">
+                <label class="form-label">Forma predominante</label>
+                <select name="forma_doenca" class="form-select">
+                    <option value="1. Axial">Axial</option>
+                    <option value="2. Periférica">Periférica</option>
+                    <option value="3. Mista (axial + periférica)">Mista (axial + periférica)</option>
+                </select>
+            </div>
+
+            <div class="col-12"><small class="text-muted fw-semibold">3.3 Critérios diagnósticos utilizados</small></div>
+            <div class="col-md-4">
+                <label class="form-label">Critério</label>
+                <select name="criterio_diagnostico" class="form-select">
+                    <option value="1. Nova York modificado (1984)">Nova York modificado (1984)</option>
+                    <option value="2. ASAS axial (2009)">ASAS axial (2009)</option>
+                    <option value="3. ASAS periférico (2009)">ASAS periférico (2009)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- IV - Exames de Imagem (Inicial) -->
+    <div class="card section-card shadow-sm campo-inicial">
+        <div class="card-header">IV — Exames de Imagem</div>
+        <div class="card-body row g-3">
+
+            <div class="col-12"><small class="text-muted fw-semibold">4.1 RX de Sacroilíacas</small></div>
+            <div class="col-md-3">
+                <label class="form-label">Realizado?</label>
+                <select name="rx_sacro_realizado" class="form-select" id="rx_sacro_sel">
+                    <option value="Não">Não</option><option value="Sim">Sim</option>
+                </select>
+            </div>
+            <div id="rx_sacro_detalhes" class="col-12 row g-3" style="display:none">
+                <div class="col-md-4">
+                    <label class="form-label">Grau de sacroileíte</label>
+                    <select name="sacroileite_grau" class="form-select">
+                        <option value="Grau I bilateral ou unilateral">Grau I (suspeito)</option>
+                        <option value="Grau II bilateral">Grau II bilateral</option>
+                        <option value="Grau III ou IV unilateral">Grau III ou IV unilateral</option>
+                        <option value="Grau III ou IV bilateral">Grau III ou IV bilateral</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-12"><small class="text-muted fw-semibold">4.2 RMN de Sacroilíacas</small></div>
+            <div class="col-md-3">
+                <label class="form-label">Realizado?</label>
+                <select name="rmn_sacro_realizado" class="form-select" id="rmn_sacro_sel">
+                    <option value="Não">Não</option><option value="Sim">Sim</option>
+                </select>
+            </div>
+            <div id="rmn_sacro_detalhes" class="col-12 row g-3" style="display:none">
+                <div class="col-md-3">
+                    <label class="form-label">Edema ósseo (STIR)</label>
+                    <select name="rmn_edema_osseo" class="form-select"><option value="Sim">Sim</option><option value="Não">Não</option></select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Erosões</label>
+                    <select name="rmn_erosoes" class="form-select"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Esclerose</label>
+                    <select name="rmn_esclerose" class="form-select"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+            </div>
+
+            <div class="col-12"><small class="text-muted fw-semibold">4.3 RX de Coluna</small></div>
+            <div class="col-md-3">
+                <label class="form-label">Realizado?</label>
+                <select name="rx_coluna_realizado" class="form-select" id="rx_coluna_sel">
+                    <option value="Não">Não</option><option value="Sim">Sim</option>
+                </select>
+            </div>
+            <div id="rx_coluna_detalhes" class="col-12 row g-3" style="display:none">
+                <div class="col-md-3">
+                    <label class="form-label">Sindesmófitos</label>
+                    <select name="sindesmofitos" class="form-select"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Ankylosis (coluna em bambu)</label>
+                    <select name="coluna_bambu" class="form-select"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- V - Atividade da Doença (ambos) -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header" id="secao_atividade_titulo">V — Atividade da Doença</div>
+        <div class="card-body row g-3">
+
+            <div class="col-md-3">
+                <label class="form-label">PCR (mg/dL)</label>
+                <input type="text" name="pcr" id="pcr_val" class="form-control calc-field" placeholder="Ex: 1.2 ou NR">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">VSG/VHS (mm/h)</label>
+                <input type="text" name="vsg" id="vsg_val" class="form-control calc-field" placeholder="Ex: 35">
+            </div>
+
+            <div class="col-12"><hr class="my-1"><small class="text-muted fw-semibold">BASDAI — Bath Ankylosing Spondylitis Disease Activity Index (EVA 0–10 para cada questão)</small></div>
+
+            <div class="col-md-6">
+                <label class="form-label">Q1. Nível geral de fadiga/cansaço</label>
+                <input type="number" name="basdai_q1" id="bq1" class="form-control calc-field" placeholder="0–10" min="0" max="10" step="0.5">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Q2. Dor no pescoço, costas ou quadris</label>
+                <input type="number" name="basdai_q2" id="bq2" class="form-control calc-field" placeholder="0–10" min="0" max="10" step="0.5">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Q3. Dor/inchaço em outras articulações</label>
+                <input type="number" name="basdai_q3" id="bq3" class="form-control calc-field" placeholder="0–10" min="0" max="10" step="0.5">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Q4. Desconforto em áreas sensíveis ao toque</label>
+                <input type="number" name="basdai_q4" id="bq4" class="form-control calc-field" placeholder="0–10" min="0" max="10" step="0.5">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Q5. Nível de rigidez matinal ao acordar</label>
+                <input type="number" name="basdai_q5" id="bq5" class="form-control calc-field" placeholder="0–10" min="0" max="10" step="0.5">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Q6. Duração da rigidez matinal (0=nenhuma; 10=≥2h)</label>
+                <input type="number" name="basdai_q6" id="bq6" class="form-control calc-field" placeholder="0–10" min="0" max="10" step="0.5">
+            </div>
+
+            <div class="col-12"><small class="text-muted fw-semibold">ASDAS — Avaliação Global pelo Paciente (EVA 0–10)</small></div>
+            <div class="col-md-4">
+                <label class="form-label">Avaliação global da doença pelo paciente (0–10)</label>
+                <input type="number" name="asdas_pga" id="pga_val" class="form-control calc-field" placeholder="0–10" min="0" max="10" step="0.5">
+            </div>
+
+            <!-- Calculadora automática -->
+            <div class="col-12">
+                <div id="calc_box" class="p-3 rounded" style="background:#fff5f5; border-left:4px solid #dc3545;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-calculator-fill text-danger"></i>
+                        <strong class="text-danger">Calculadora BASDAI / ASDAS</strong>
+                    </div>
+                    <div id="calc_resultado" class="fs-5 fw-bold text-dark">—</div>
+                    <div id="calc_detalhe" class="text-muted small mt-1"></div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Índice utilizado no laudo</label>
+                <select name="indice_tipo" class="form-select" id="indice_tipo">
+                    <option value="1. BASDAI">BASDAI</option>
+                    <option value="2. ASDAS-PCR">ASDAS-PCR</option>
+                    <option value="3. ASDAS-VHS">ASDAS-VHS</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Valor do índice</label>
+                <input type="text" name="valor_indice" id="valor_indice" class="form-control fw-bold fs-5" placeholder="automático">
+            </div>
+
+        </div>
+    </div>
+
+    <!-- VI - Tratamento Anterior com AINEs (Inicial) -->
+    <div class="card section-card shadow-sm campo-inicial">
+        <div class="card-header">VI — Histórico do Tratamento (AINEs e DMARDs anteriores)</div>
+        <div class="card-body">
+            <p class="text-muted small mb-3">O protocolo exige falha de pelo menos 2 AINEs em doses adequadas por no mínimo 3 meses cada.</p>
+            {% for i in range(1, 5) %}
+            <div class="sub-card">
+                <div class="row g-2 align-items-end">
+                    <div class="col-1 text-center text-muted fw-bold">{{ i }}</div>
+                    <div class="col-md-4"><label class="form-label">Fármaco</label>
+                        <input type="text" name="farmaco_ant_{{ i }}" class="form-control" list="aines_list" placeholder="Ex: Naproxeno, Diclofenaco"></div>
+                    <div class="col-md-4"><label class="form-label">Posologia</label>
+                        <input type="text" name="posologia_ant_{{ i }}" class="form-control" placeholder="Ex: 500 mg 2x/dia"></div>
+                    <div class="col-md-3"><label class="form-label">Período</label>
+                        <input type="text" name="periodo_ant_{{ i }}" class="form-control" placeholder="jan/23 – dez/24"></div>
+                </div>
+            </div>
+            {% endfor %}
+            <datalist id="aines_list">
+                <option value="Naproxeno">
+                <option value="Diclofenaco">
+                <option value="Ibuprofeno">
+                <option value="Indometacina">
+                <option value="Celecoxibe">
+                <option value="Etoricoxibe">
+                <option value="Piroxicam">
+                <option value="Meloxicam">
+                <option value="Sulfassalazina">
+                <option value="Metotrexato">
+            </datalist>
+        </div>
+    </div>
+
+    <!-- VII - Terapia Proposta (Inicial) -->
+    <div class="card section-card shadow-sm campo-inicial">
+        <div class="card-header">VII — Terapia Imunobiológica Proposta</div>
+        <div class="card-body row g-3">
+            <div class="col-md-5">
+                <label class="form-label">Fármaco <span class="required-star">*</span></label>
+                <input type="text" name="farmaco_proposto" class="form-control" list="farmacos_list" placeholder="Selecione ou digite">
+                <datalist id="farmacos_list">{% for f in farmacos %}<option value="{{ f }}">{% endfor %}</datalist>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Posologia</label>
+                <input type="text" name="posologia_proposta" class="form-control" placeholder="Ex: 150 mg SC a cada 4 semanas">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">RX tórax e PPD avaliados?</label>
+                <select name="ppd_rx" class="form-select"><option value="Sim">Sim</option><option value="Não">Não</option></select>
+            </div>
+        </div>
+    </div>
+
+    <!-- VII - Evolução Clínica (Manutenção) -->
+    <div class="card section-card shadow-sm campo-manutencao" style="display:none">
+        <div class="card-header">VII — Evolução Clínica</div>
+        <div class="card-body row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Boa resposta terapêutica?</label>
+                <select name="boa_resposta" class="form-select">
+                    <option value="Sim">Sim</option>
+                    <option value="Não">Não</option>
+                </select>
+            </div>
+            <div class="col-md-9">
+                <label class="form-label">Falha terapêutica / evento adverso (se houver)</label>
+                <input type="text" name="descricao_falha" class="form-control" placeholder="Descrever se aplicável">
+            </div>
+        </div>
+    </div>
+
+    <!-- VIII - Recomendação (Manutenção) -->
+    <div class="card section-card shadow-sm campo-manutencao" style="display:none">
+        <div class="card-header">VIII — Recomendação</div>
+        <div class="card-body row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Manter o tratamento?</label>
+                <select name="manter" class="form-select">
+                    <option value="Sim">Sim</option>
+                    <option value="Não">Não</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Modificar o tratamento?</label>
+                <select name="modificar" class="form-select">
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Fármaco <span class="required-star">*</span></label>
+                <input type="text" name="farmaco" class="form-control" list="farmacos_manut_list" placeholder="Selecione ou digite">
+                <datalist id="farmacos_manut_list">{% for f in farmacos %}<option value="{{ f }}">{% endfor %}</datalist>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Posologia</label>
+                <input type="text" name="posologia" class="form-control" placeholder="Ex: 150 mg SC a cada 4 semanas">
+            </div>
+        </div>
+    </div>
+
+    <!-- Observações e Data (ambos) -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header" id="secao_obs_titulo">VIII — Observações e Data</div>
+        <div class="card-body row g-3">
+            <div class="col-md-10">
+                <label class="form-label">Observações clínicas</label>
+                <textarea name="observacoes" class="form-control" rows="3" placeholder="Descreva situações relevantes não previstas no protocolo..."></textarea>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Data do laudo</label>
+                <input type="text" name="data" class="form-control" value="{{ today }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <button type="submit" class="btn btn-danger btn-gerar text-white">
+            <i class="bi bi-file-earmark-arrow-down me-2"></i>Gerar Laudo Excel
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Mostrar/ocultar seções conforme tipo de laudo
+function atualizarTipo() {
+    const tipo = document.getElementById('tipo_laudo').value;
+    const isInicial = tipo === 'Inicial';
+
+    document.querySelectorAll('.campo-inicial').forEach(el => {
+        el.style.display = isInicial ? '' : 'none';
+    });
+    document.querySelectorAll('.campo-manutencao').forEach(el => {
+        el.style.display = isInicial ? 'none' : '';
+    });
+
+    // Ajustar numeração das seções
+    document.getElementById('secao_atividade_titulo').textContent =
+        isInicial ? 'V — Atividade da Doença' : 'III — Atividade da Doença';
+    document.getElementById('secao_obs_titulo').textContent =
+        isInicial ? 'VIII — Observações e Data' : 'IX — Observações e Data';
+}
+
+document.getElementById('tipo_laudo').addEventListener('change', atualizarTipo);
+atualizarTipo();
+
+// Exames de imagem (condicional)
+document.getElementById('rx_sacro_sel').addEventListener('change', function() {
+    document.getElementById('rx_sacro_detalhes').style.display = this.value === 'Sim' ? 'flex' : 'none';
+});
+document.getElementById('rmn_sacro_sel').addEventListener('change', function() {
+    document.getElementById('rmn_sacro_detalhes').style.display = this.value === 'Sim' ? 'flex' : 'none';
+});
+document.getElementById('rx_coluna_sel').addEventListener('change', function() {
+    document.getElementById('rx_coluna_detalhes').style.display = this.value === 'Sim' ? 'flex' : 'none';
+});
+
+// Calculadora BASDAI / ASDAS
+function badgeBASDI(v) {
+    if (v < 4)  return `<span class="badge bg-success ms-2">Baixa &lt;4</span>`;
+    if (v <= 6) return `<span class="badge bg-warning text-dark ms-2">Moderada 4–6</span>`;
+    return `<span class="badge bg-danger ms-2">Alta &gt;6</span>`;
+}
+function badgeASDAS(v) {
+    if (v < 1.3)  return `<span class="badge bg-success ms-2">Inativa &lt;1.3</span>`;
+    if (v < 2.1)  return `<span class="badge bg-info text-dark ms-2">Baixa &lt;2.1</span>`;
+    if (v <= 3.5) return `<span class="badge bg-warning text-dark ms-2">Alta 2.1–3.5</span>`;
+    return `<span class="badge bg-danger ms-2">Muito alta &gt;3.5</span>`;
+}
+
+function calcEA() {
+    const bq1 = parseFloat(document.getElementById('bq1').value);
+    const bq2 = parseFloat(document.getElementById('bq2').value);
+    const bq3 = parseFloat(document.getElementById('bq3').value);
+    const bq4 = parseFloat(document.getElementById('bq4').value);
+    const bq5 = parseFloat(document.getElementById('bq5').value);
+    const bq6 = parseFloat(document.getElementById('bq6').value);
+    const pga = parseFloat(document.getElementById('pga_val').value);
+    const pcrDL = parseFloat(document.getElementById('pcr_val').value.trim());
+    const vsg = parseFloat(document.getElementById('vsg_val').value.trim());
+
+    const res    = document.getElementById('calc_resultado');
+    const det    = document.getElementById('calc_detalhe');
+    const indice = document.getElementById('indice_tipo').value;
+    const campo  = document.getElementById('valor_indice');
+
+    let partes = [];
+    let valor = null;
+
+    // BASDAI
+    if (!isNaN(bq1) && !isNaN(bq2) && !isNaN(bq3) && !isNaN(bq4) && !isNaN(bq5) && !isNaN(bq6)) {
+        const basdai = Math.round(((bq1 + bq2 + bq3 + bq4 + (bq5 + bq6) / 2) / 5) * 100) / 100;
+        partes.push(`<span>BASDAI: <strong>${basdai}</strong>${badgeBASDI(basdai)}</span>`);
+        if (indice === '1. BASDAI') valor = basdai;
+    }
+
+    // ASDAS-PCR
+    if (!isNaN(bq2) && !isNaN(bq3) && !isNaN(bq6) && !isNaN(pga) && !isNaN(pcrDL)) {
+        const pcrL = pcrDL * 10;
+        const asdas_pcr = Math.round((0.121*bq2 + 0.058*bq6 + 0.110*pga + 0.073*bq3 + 0.579*Math.log(pcrL + 1)) * 100) / 100;
+        partes.push(`<span>ASDAS-PCR: <strong>${asdas_pcr}</strong>${badgeASDAS(asdas_pcr)}</span>`);
+        if (indice === '2. ASDAS-PCR') valor = asdas_pcr;
+    }
+
+    // ASDAS-VHS
+    if (!isNaN(bq2) && !isNaN(bq3) && !isNaN(bq6) && !isNaN(pga) && !isNaN(vsg) && vsg > 0) {
+        const asdas_vhs = Math.round((0.079*bq2 + 0.069*bq6 + 0.113*pga + 0.086*bq3 + 0.293*Math.sqrt(vsg)) * 100) / 100;
+        partes.push(`<span>ASDAS-VHS: <strong>${asdas_vhs}</strong>${badgeASDAS(asdas_vhs)}</span>`);
+        if (indice === '3. ASDAS-VHS') valor = asdas_vhs;
+    }
+
+    if (partes.length > 0) {
+        res.innerHTML = partes.join('<span class="mx-3 text-muted">|</span>');
+        det.innerHTML = 'BASDAI = (Q1+Q2+Q3+Q4+média(Q5,Q6)) / 5 &nbsp;|&nbsp; ASDAS-PCR = 0.121×Q2 + 0.058×Q6 + 0.110×PGA + 0.073×Q3 + 0.579×ln(PCR_mgL+1)';
+    } else {
+        res.innerHTML = '<span class="text-muted">Preencha as questões do BASDAI para calcular</span>';
+        det.innerHTML = '';
+    }
+
+    if (valor !== null) campo.value = valor;
+}
+
+document.getElementById('indice_tipo').addEventListener('change', calcEA);
+document.querySelectorAll('.calc-field').forEach(el => el.addEventListener('input', calcEA));
+calcEA();
+</script>
+{% endblock %}

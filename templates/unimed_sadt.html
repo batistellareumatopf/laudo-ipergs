@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Guia SADT — Unimed{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+
+        <div class="mb-4">
+            <a href="/" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Voltar
+            </a>
+        </div>
+
+        <div class="card section-card">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-file-earmark-pdf-fill text-success"></i>
+                <span>Preencher Guia SADT — Unimed</span>
+            </div>
+            <div class="card-body p-4">
+
+                {% if erro %}
+                <div class="alert alert-danger py-2">
+                    <i class="bi bi-exclamation-triangle me-2"></i>{{ erro }}
+                </div>
+                {% endif %}
+
+                <form method="POST" action="/unimed/sadt">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Nome do Paciente
+                        </label>
+                        <input type="text" class="form-control" name="nome"
+                               value="{{ nome }}" autofocus autocomplete="off">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Indicação Clínica
+                        </label>
+                        <input type="text" class="form-control" name="ind_clinica"
+                               value="{{ ind_clinica }}" autocomplete="off">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">
+                            Descrição
+                        </label>
+                        <input type="text" class="form-control" name="descricao"
+                               value="{{ descricao }}" autocomplete="off">
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-gerar w-100 text-white">
+                        <i class="bi bi-file-earmark-arrow-down me-2"></i>Gerar PDF
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

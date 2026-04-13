@@ -5,6 +5,11 @@ from io import BytesIO
 import os
 import datetime
 import anthropic
+import io
+from reportlab.pdfgen import canvas
+from reportlab.lib.colors import black
+from pypdf import PdfReader, PdfWriter, Transformation
+from pypdf.generic import RectangleObject
 
 app = Flask(__name__)
 CORS(app)
@@ -757,6 +762,59 @@ def tc_ea():
         cids=CID_EA,
         today=datetime.date.today().strftime('%d/%m/%Y'),
     )
+
+
+SADT_PDF_ORIGINAL = "/Users/clinicabeneser/Downloads/EXAMES UNIMED.pdf"
+SADT_ORIG_W, SADT_ORIG_H = 2058.0, 2924.0
+SADT_LAND_W, SADT_LAND_H = SADT_ORIG_H, SADT_ORIG_W
+SADT_CAMPOS = {
+    "nome":        {"x": 1217, "y": 1721, "tamanho": 34},
+    "ind_clinica": {"x": 1375, "y": 1341, "tamanho": 34},
+    "descricao":   {"x":  787, "y": 1274, "tamanho": 34},
+}
+
+
+@app.route('/unimed/sadt', methods=['GET', 'POST'])
+def unimed_sadt():
+    if request.method == 'POST':
+        nome      = request.form.get('nome', '').strip()
+        ind       = request.form.get('ind_clinica', '').strip()
+        desc      = request.form.get('descricao', '').strip()
+        try:
+            reader = PdfReader(SADT_PDF_ORIGINAL)
+            page   = reader.pages[0]
+            t = Transformation((0, 1, -1, 0, SADT_ORIG_H, 0))
+            page.add_transformation(t)
+            page.mediabox = RectangleObject([0, 0, SADT_LAND_W, SADT_LAND_H])
+
+            buf = io.BytesIO()
+            c = canvas.Canvas(buf, pagesize=(SADT_LAND_W, SADT_LAND_H))
+            c.setFillColor(black)
+            for chave, texto in [("nome", nome), ("ind_clinica", ind), ("descricao", desc)]:
+                if texto:
+                    cfg = SADT_CAMPOS[chave]
+                    c.setFont("Helvetica", cfg["tamanho"])
+                    c.drawString(cfg["x"], cfg["y"], texto)
+            c.save()
+
+            buf.seek(0)
+            overlay = PdfReader(buf)
+            page.merge_page(overlay.pages[0])
+
+            writer = PdfWriter()
+            writer.add_page(page)
+            out = io.BytesIO()
+            writer.write(out)
+            out.seek(0)
+            return send_file(out, mimetype="application/pdf",
+                             download_name="GUIA_PREENCHIDA.pdf",
+                             as_attachment=False)
+        except Exception as e:
+            return render_template('unimed_sadt.html',
+                                   nome=nome, ind_clinica=ind,
+                                   descricao=desc, erro=str(e))
+    return render_template('unimed_sadt.html',
+                           nome='', ind_clinica='', descricao='', erro=None)
 
 
 if __name__ == '__main__':

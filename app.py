@@ -768,15 +768,15 @@ SADT_PDF_ORIGINAL = os.path.join(BASE_DIR, "unimed-sadt", "formulario_sadt.pdf")
 SADT_ORIG_W, SADT_ORIG_H = 2058.0, 2924.0
 SADT_LAND_W, SADT_LAND_H = SADT_ORIG_H, SADT_ORIG_W
 SADT_CAMPOS = {
-    "nome":        {"x": 1217, "y": 1692, "tamanho": 34},
-    "ind_clinica": {"x":  885, "y": 1390, "tamanho": 34},
-    "descricao":   {"x":  689, "y": 1323, "tamanho": 34},
+    "nome":        {"x": 1217, "y": 1770, "tamanho": 34},
+    "ind_clinica": {"x":  807, "y": 1419, "tamanho": 34},
+    "descricao":   {"x":  591, "y": 1362, "tamanho": 34},
 }
 
 # Campos preenchidos automaticamente com dados do médico
 SADT_AUTO = [
-    {"texto": "FÁBIO BATISTELLA", "x":   98, "y": 1494, "tamanho": 34},
-    {"texto": "31746",             "x": 1304, "y": 1494, "tamanho": 34},
+    {"texto": "FÁBIO BATISTELLA", "x":   98, "y": 1543, "tamanho": 34},
+    {"texto": "31746",             "x": 1304, "y": 1543, "tamanho": 34},
 ]
 
 
@@ -787,14 +787,11 @@ def unimed_sadt():
         ind       = request.form.get('ind_clinica', '').strip()
         desc      = request.form.get('descricao', '').strip()
         try:
-            reader = PdfReader(SADT_PDF_ORIGINAL)
-            page   = reader.pages[0]
-            t = Transformation((0, 1, -1, 0, SADT_ORIG_H, 0))
-            page.add_transformation(t)
-            page.mediabox = RectangleObject([0, 0, SADT_LAND_W, SADT_LAND_H])
-
-            buf = io.BytesIO()
-            c = canvas.Canvas(buf, pagesize=(SADT_LAND_W, SADT_LAND_H))
+            out = io.BytesIO()
+            c = canvas.Canvas(out, pagesize=(SADT_LAND_W, SADT_LAND_H))
+            from reportlab.lib.colors import white
+            c.setFillColor(white)
+            c.rect(0, 0, SADT_LAND_W, SADT_LAND_H, stroke=0, fill=1)
             c.setFillColor(black)
             for chave, texto in [("nome", nome), ("ind_clinica", ind), ("descricao", desc)]:
                 if texto:
@@ -806,14 +803,6 @@ def unimed_sadt():
                 c.drawString(auto["x"], auto["y"], auto["texto"])
             c.save()
 
-            buf.seek(0)
-            overlay = PdfReader(buf)
-            page.merge_page(overlay.pages[0])
-
-            writer = PdfWriter()
-            writer.add_page(page)
-            out = io.BytesIO()
-            writer.write(out)
             out.seek(0)
             return send_file(out, mimetype="application/pdf",
                              download_name="GUIA_PREENCHIDA.pdf",

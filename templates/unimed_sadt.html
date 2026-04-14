@@ -42,11 +42,13 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label">
-                            Descrição
-                        </label>
-                        <input type="text" class="form-control" name="descricao"
-                               value="{{ descricao }}" autocomplete="off">
+                        <label class="form-label">Descrição dos Exames</label>
+                        <input type="text" class="form-control mb-2" name="descricao1"
+                               value="{{ descricao1 }}" placeholder="Linha 1" autocomplete="off">
+                        <input type="text" class="form-control mb-2" name="descricao2"
+                               value="{{ descricao2 }}" placeholder="Linha 2" autocomplete="off">
+                        <input type="text" class="form-control" name="descricao3"
+                               value="{{ descricao3 }}" placeholder="Linha 3" autocomplete="off">
                     </div>
 
                     <button type="submit" class="btn btn-success btn-gerar w-100 text-white">

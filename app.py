@@ -770,7 +770,9 @@ SADT_LAND_W, SADT_LAND_H = SADT_ORIG_H, SADT_ORIG_W
 SADT_CAMPOS = {
     "nome":        {"x": 1217, "y": 1770, "tamanho": 34},
     "ind_clinica": {"x":  807, "y": 1419, "tamanho": 34},
-    "descricao":   {"x":  591, "y": 1362, "tamanho": 34},
+    "descricao1":  {"x":  591, "y": 1284, "tamanho": 34},
+    "descricao2":  {"x":  591, "y": 1229, "tamanho": 34},
+    "descricao3":  {"x":  591, "y": 1174, "tamanho": 34},
 }
 
 # Campos preenchidos automaticamente com dados do médico
@@ -783,9 +785,11 @@ SADT_AUTO = [
 @app.route('/unimed/sadt', methods=['GET', 'POST'])
 def unimed_sadt():
     if request.method == 'POST':
-        nome      = request.form.get('nome', '').strip()
-        ind       = request.form.get('ind_clinica', '').strip()
-        desc      = request.form.get('descricao', '').strip()
+        nome   = request.form.get('nome', '').strip()
+        ind    = request.form.get('ind_clinica', '').strip()
+        desc1  = request.form.get('descricao1', '').strip()
+        desc2  = request.form.get('descricao2', '').strip()
+        desc3  = request.form.get('descricao3', '').strip()
         try:
             out = io.BytesIO()
             c = canvas.Canvas(out, pagesize=(SADT_LAND_W, SADT_LAND_H))
@@ -793,7 +797,8 @@ def unimed_sadt():
             c.setFillColor(white)
             c.rect(0, 0, SADT_LAND_W, SADT_LAND_H, stroke=0, fill=1)
             c.setFillColor(black)
-            for chave, texto in [("nome", nome), ("ind_clinica", ind), ("descricao", desc)]:
+            for chave, texto in [("nome", nome), ("ind_clinica", ind),
+                                  ("descricao1", desc1), ("descricao2", desc2), ("descricao3", desc3)]:
                 if texto:
                     cfg = SADT_CAMPOS[chave]
                     c.setFont("Helvetica", cfg["tamanho"])
@@ -810,9 +815,9 @@ def unimed_sadt():
         except Exception as e:
             return render_template('unimed_sadt.html',
                                    nome=nome, ind_clinica=ind,
-                                   descricao=desc, erro=str(e))
+                                   descricao1=desc1, descricao2=desc2, descricao3=desc3, erro=str(e))
     return render_template('unimed_sadt.html',
-                           nome='', ind_clinica='', descricao='', erro=None)
+                           nome='', ind_clinica='', descricao1='', descricao2='', descricao3='', erro=None)
 
 
 if __name__ == '__main__':

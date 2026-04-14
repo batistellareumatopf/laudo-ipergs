@@ -764,7 +764,7 @@ def tc_ea():
     )
 
 
-SADT_PDF_ORIGINAL = "/Users/clinicabeneser/Downloads/EXAMES UNIMED.pdf"
+SADT_PDF_ORIGINAL = os.path.join(BASE_DIR, "unimed-sadt", "formulario_sadt.pdf")
 SADT_ORIG_W, SADT_ORIG_H = 2058.0, 2924.0
 SADT_LAND_W, SADT_LAND_H = SADT_ORIG_H, SADT_ORIG_W
 SADT_CAMPOS = {

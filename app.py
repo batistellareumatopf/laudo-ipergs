@@ -768,15 +768,15 @@ SADT_PDF_ORIGINAL = os.path.join(BASE_DIR, "unimed-sadt", "formulario_sadt.pdf")
 SADT_ORIG_W, SADT_ORIG_H = 2058.0, 2924.0
 SADT_LAND_W, SADT_LAND_H = SADT_ORIG_H, SADT_ORIG_W
 SADT_CAMPOS = {
-    "nome":        {"x": 1217, "y": 1721, "tamanho": 34},
-    "ind_clinica": {"x": 1375, "y": 1341, "tamanho": 34},
-    "descricao":   {"x":  787, "y": 1274, "tamanho": 34},
+    "nome":        {"x": 1217, "y": 1692, "tamanho": 34},
+    "ind_clinica": {"x":  885, "y": 1390, "tamanho": 34},
+    "descricao":   {"x":  689, "y": 1323, "tamanho": 34},
 }
 
 # Campos preenchidos automaticamente com dados do médico
 SADT_AUTO = [
-    {"texto": "FÁBIO BATISTELLA", "x": 1500, "y": 200,  "tamanho": 34},
-    {"texto": "31746",             "x": 1500, "y": 1200, "tamanho": 34},
+    {"texto": "FÁBIO BATISTELLA", "x":   98, "y": 1494, "tamanho": 34},
+    {"texto": "31746",             "x": 1304, "y": 1494, "tamanho": 34},
 ]
 
 

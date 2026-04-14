@@ -773,6 +773,12 @@ SADT_CAMPOS = {
     "descricao":   {"x":  787, "y": 1274, "tamanho": 34},
 }
 
+# Campos preenchidos automaticamente com dados do médico
+SADT_AUTO = [
+    {"texto": "FÁBIO BATISTELLA", "x": 1500, "y": 200,  "tamanho": 34},
+    {"texto": "31746",             "x": 1500, "y": 1200, "tamanho": 34},
+]
+
 
 @app.route('/unimed/sadt', methods=['GET', 'POST'])
 def unimed_sadt():
@@ -795,6 +801,9 @@ def unimed_sadt():
                     cfg = SADT_CAMPOS[chave]
                     c.setFont("Helvetica", cfg["tamanho"])
                     c.drawString(cfg["x"], cfg["y"], texto)
+            for auto in SADT_AUTO:
+                c.setFont("Helvetica", auto["tamanho"])
+                c.drawString(auto["x"], auto["y"], auto["texto"])
             c.save()
 
             buf.seek(0)

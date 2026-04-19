@@ -791,11 +791,14 @@ def unimed_sadt():
         desc2  = request.form.get('descricao2', '').strip()
         desc3  = request.form.get('descricao3', '').strip()
         try:
-            out = io.BytesIO()
-            c = canvas.Canvas(out, pagesize=(SADT_LAND_W, SADT_LAND_H))
-            from reportlab.lib.colors import white
-            c.setFillColor(white)
-            c.rect(0, 0, SADT_LAND_W, SADT_LAND_H, stroke=0, fill=1)
+            reader = PdfReader(SADT_PDF_ORIGINAL)
+            page = reader.pages[0]
+            t = Transformation((0, 1, -1, 0, SADT_ORIG_H, 0))
+            page.add_transformation(t)
+            page.mediabox = RectangleObject([0, 0, SADT_LAND_W, SADT_LAND_H])
+
+            overlay_buf = io.BytesIO()
+            c = canvas.Canvas(overlay_buf, pagesize=(SADT_LAND_W, SADT_LAND_H))
             c.setFillColor(black)
             for chave, texto in [("nome", nome), ("ind_clinica", ind),
                                   ("descricao1", desc1), ("descricao2", desc2), ("descricao3", desc3)]:
@@ -808,6 +811,14 @@ def unimed_sadt():
                 c.drawString(auto["x"], auto["y"], auto["texto"])
             c.save()
 
+            overlay_buf.seek(0)
+            overlay = PdfReader(overlay_buf)
+            page.merge_page(overlay.pages[0])
+
+            writer = PdfWriter()
+            writer.add_page(page)
+            out = io.BytesIO()
+            writer.write(out)
             out.seek(0)
             return send_file(out, mimetype="application/pdf",
                              download_name="GUIA_PREENCHIDA.pdf",

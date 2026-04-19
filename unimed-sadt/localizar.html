@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Localizar Campos</title>
+<style>
+  body { margin: 0; background: #1e1e2e; color: #cdd6f4; font-family: Helvetica, sans-serif; }
+  #topo { position: sticky; top: 0; z-index: 10; background: #181825; padding: 10px 18px;
+          display: flex; align-items: center; gap: 24px; border-bottom: 2px solid #313244; flex-wrap: wrap; }
+  #btn-desfazer { background: #f38ba8; color: #1e1e2e; border: none; border-radius: 6px;
+                  padding: 6px 16px; font-size: 13px; font-weight: bold; cursor: pointer; }
+  #btn-desfazer:hover { background: #eba0ac; }
+  #instrucao { font-size: 16px; font-weight: bold; color: #fff; min-width: 380px; }
+  #posicao   { font-size: 13px; color: #a6e3a1; }
+  #resultado { font-size: 13px; color: #f9e2af; white-space: pre; }
+  #wrapper   { overflow: auto; }
+  #container { position: relative; display: inline-block; cursor: crosshair; }
+  img        { display: block; }
+  .marker    { position: absolute; width: 16px; height: 16px; border-radius: 50%;
+               transform: translate(-50%, -50%); border: 2px solid #000; pointer-events: none; }
+  .label     { position: absolute; font-size: 12px; font-weight: bold;
+               transform: translateY(-50%); pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div id="topo">
+  <div id="instrucao">► Clique no campo: <span id="campo-atual">NOME</span></div>
+  <div id="posicao">x = —  y = —</div>
+  <button id="btn-desfazer" onclick="desfazer()">↩ Desfazer</button>
+  <div id="resultado"></div>
+</div>
+
+<div id="wrapper">
+  <div id="container">
+    <img id="form-img" src="file:///Users/clinicabeneser/Downloads/formulario.png">
+  </div>
+</div>
+
+<script>
+  // Dimensões reais do PDF em paisagem (coordenadas do formulário)
+  const PDF_W = 2924;
+  const PDF_H = 2058;
+
+  const campos  = ["NOME", "INDICAÇÃO CLÍNICA", "DESCRIÇÃO (1ª linha)"];
+  const cores   = ["#f38ba8", "#a6e3a1", "#89b4fa"];
+  let   idx     = 0;
+  const capturados = {};
+
+  const img       = document.getElementById("form-img");
+  const container = document.getElementById("container");
+  const lblCampo  = document.getElementById("campo-atual");
+  const lblPos    = document.getElementById("posicao");
+  const lblRes    = document.getElementById("resultado");
+
+  function imgCoords(e) {
+    const rect  = img.getBoundingClientRect();
+    const scaleX = PDF_W / img.naturalWidth  * (img.naturalWidth  / img.offsetWidth);
+    const scaleY = PDF_H / img.naturalHeight * (img.naturalHeight / img.offsetHeight);
+    const cx = (e.clientX - rect.left)  * (img.naturalWidth  / img.offsetWidth);
+    const cy = (e.clientY - rect.top)   * (img.naturalHeight / img.offsetHeight);
+    const px = Math.round(cx * PDF_W / img.naturalWidth);
+    const py = Math.round(PDF_H - cy * PDF_H / img.naturalHeight);
+    return { px, py, cx: e.clientX - rect.left, cy: e.clientY - rect.top };
+  }
+
+  img.addEventListener("mousemove", e => {
+    const {px, py} = imgCoords(e);
+    lblPos.textContent = `x = ${px}   y = ${py}`;
+  });
+
+  const marcadoresEls = [];
+
+  function desfazer() {
+    if (idx === 0) return;
+    idx--;
+    const campo = campos[idx];
+    delete capturados[campo];
+    lblCampo.textContent = campo;
+    document.querySelector("#instrucao").textContent = "► Clique no campo:";
+    lblRes.textContent = "";
+    // Remove os dois últimos elementos (dot + label)
+    const removidos = marcadoresEls.pop();
+    if (removidos) { removidos.forEach(el => el.remove()); }
+  }
+
+  img.addEventListener("click", e => {
+    if (idx >= campos.length) return;
+    const {px, py, cx, cy} = imgCoords(e);
+    const campo = campos[idx];
+    capturados[campo] = {x: px, y: py};
+
+    // Marcador visual
+    const dot = document.createElement("div");
+    dot.className = "marker";
+    dot.style.left = cx + "px";
+    dot.style.top  = cy + "px";
+    dot.style.background = cores[idx];
+    container.appendChild(dot);
+
+    const lbl = document.createElement("div");
+    lbl.className = "label";
+    lbl.style.left  = (cx + 12) + "px";
+    lbl.style.top   = cy + "px";
+    lbl.style.color = cores[idx];
+    lbl.textContent = campo;
+    container.appendChild(lbl);
+
+    marcadoresEls.push([dot, lbl]);
+    idx++;
+    if (idx < campos.length) {
+      lblCampo.textContent = campos[idx];
+    } else {
+      lblCampo.parentElement.querySelector("#instrucao").textContent = "✓ Todos marcados!";
+      let res = "Coordenadas:\n";
+      for (const [c, {x, y}] of Object.entries(capturados))
+        res += `  ${c}: x=${x}, y=${y}\n`;
+      lblRes.textContent = res;
+      console.log(res);
+    }
+  });
+</script>
+</body>
+</html>

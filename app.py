@@ -820,5 +820,10 @@ def unimed_sadt():
                            nome='', ind_clinica='', descricao1='', descricao2='', descricao3='', erro=None)
 
 
+@app.route('/metodo-alvo')
+def metodo_alvo():
+    return render_template('metodo-alvo.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)

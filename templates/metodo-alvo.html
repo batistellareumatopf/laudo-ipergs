@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Método Alvo — Avaliação de Atividade</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --verde:    #22c55e;
+    --amarelo:  #eab308;
+    --vermelho: #ef4444;
+    --azul:     #3b82f6;
+    --bg:       #f8fafc;
+    --card:     #ffffff;
+    --texto:    #1e293b;
+    --muted:    #64748b;
+    --borda:    #e2e8f0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--texto);
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .container { max-width: 720px; margin: 0 auto; }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 32px 0 24px;
+  }
+  .logo-alvo {
+    width: 64px; height: 64px;
+    margin: 0 auto 16px;
+    position: relative;
+  }
+  .logo-alvo svg { width: 100%; height: 100%; }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--texto);
+    letter-spacing: -0.5px;
+  }
+  .header h1 span { color: var(--azul); }
+  .header p {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--borda);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .badge {
+    background: var(--azul);
+    color: white;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 11px;
+  }
+
+  /* SELEÇÃO DE DOENÇA */
+  .doencas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  .doenca-btn {
+    border: 2px solid var(--borda);
+    background: white;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .doenca-btn:hover { border-color: var(--azul); color: var(--azul); }
+  .doenca-btn.ativo {
+    border-color: var(--azul);
+    background: #eff6ff;
+    color: var(--azul);
+  }
+  .doenca-btn .sigla {
+    display: block;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  /* SLIDERS */
+  .campo { margin-bottom: 20px; }
+  .campo-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .campo-label span { font-size: 14px; font-weight: 500; }
+  .campo-valor {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--azul);
+    min-width: 32px;
+    text-align: right;
+  }
+  input[type=range] {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+    background: linear-gradient(to right, var(--azul) 0%, var(--azul) 50%, var(--borda) 50%);
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--azul);
+    box-shadow: 0 2px 6px rgba(59,130,246,0.4);
+    cursor: pointer;
+  }
+  .range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* CAMPOS NUMÉRICOS */
+  .campo-num { margin-bottom: 16px; }
+  .campo-num label { font-size: 14px; font-weight: 500; display: block; margin-bottom: 6px; }
+  .campo-num input[type=number] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .campo-num input[type=number]:focus { border-color: var(--azul); }
+
+  /* CHECKBOXES LES */
+  .manifestacoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .manif-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .manif-item:hover { border-color: var(--azul); }
+  .manif-item input[type=checkbox] { accent-color: var(--azul); width: 16px; height: 16px; }
+  .manif-item.ativo { background: #eff6ff; border-color: var(--azul); }
+
+  /* BOTÃO */
+  .btn-calcular {
+    width: 100%;
+    padding: 16px;
+    background: var(--azul);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    letter-spacing: 0.3px;
+  }
+  .btn-calcular:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.4); }
+
+  /* RESULTADO */
+  #resultado { display: none; }
+
+  .resultado-header {
+    text-align: center;
+    padding: 8px 0 24px;
+  }
+  .resultado-header h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .resultado-header p { color: var(--muted); font-size: 14px; }
+
+  /* ALVO VISUAL */
+  .alvo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0 24px;
+  }
+  #alvo-svg { width: 240px; height: 240px; }
+
+  .pontuacao-display {
+    text-align: center;
+    margin-top: 16px;
+  }
+  .pontuacao-display .numero {
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .pontuacao-display .label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* CLASSIFICAÇÃO */
+  .classificacao {
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .classif-icone { font-size: 36px; }
+  .classif-texto h3 { font-size: 18px; font-weight: 800; }
+  .classif-texto p { font-size: 13px; margin-top: 4px; opacity: 0.85; }
+
+  .classif-verde  { background: #f0fdf4; border: 2px solid var(--verde);  color: #166534; }
+  .classif-amarelo{ background: #fefce8; border: 2px solid var(--amarelo); color: #854d0e; }
+  .classif-vermelho{ background: #fef2f2; border: 2px solid var(--vermelho); color: #991b1b; }
+
+  /* META */
+  .meta-card {
+    background: #eff6ff;
+    border: 2px solid var(--azul);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .meta-card h3 { font-size: 15px; font-weight: 700; color: var(--azul); margin-bottom: 8px; }
+  .meta-card p { font-size: 14px; color: #1e40af; line-height: 1.6; }
+
+  /* DIMENSÕES */
+  .dimensoes { margin-top: 8px; }
+  .dim-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--borda);
+  }
+  .dim-item:last-child { border-bottom: none; }
+  .dim-nome { font-size: 13px; flex: 1; color: var(--muted); }
+  .dim-barra-wrap { flex: 2; height: 8px; background: var(--borda); border-radius: 4px; overflow: hidden; }
+  .dim-barra { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .dim-valor { font-size: 13px; font-weight: 700; min-width: 30px; text-align: right; }
+
+  /* BTN NOVA */
+  .btn-nova {
+    width: 100%;
+    padding: 14px;
+    background: white;
+    color: var(--azul);
+    border: 2px solid var(--azul);
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .btn-nova:hover { background: #eff6ff; }
+
+  .hidden { display: none !important; }
+  .secao-objetiva { margin-top: 8px; }
+  .secao-titulo { font-size: 13px; font-weight: 600; color: var(--muted); margin: 16px 0 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-alvo">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="30" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+        <circle cx="32" cy="32" r="21" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <circle cx="32" cy="32" r="13" fill="#cbd5e1" stroke="#64748b" stroke-width="1.5"/>
+        <circle cx="32" cy="32" r="5"  fill="#334155"/>
+      </svg>
+    </div>
+    <h1>Método <span>Alvo</span></h1>
+    <p>"Um método com alvo definido — porque tratar sem meta é andar sem destino."</p>
+  </div>
+
+  <!-- FORMULÁRIO -->
+  <div id="formulario">
+
+    <!-- SELEÇÃO DE DOENÇA -->
+    <div class="card">
+      <div class="card-title">Selecione a doença</div>
+      <div class="doencas">
+        <div class="doenca-btn" onclick="selecionarDoenca('AR')">
+          <span class="sigla">AR</span>Artrite Reumatoide
+        </div>
+        <div class="doenca-btn" onclick="selecionarDoenca('APS')">
+          <span class="sigla">APs</span>Artrite Psoriásica
+        </div>
+        <div class="doenca-btn" onclick="selecionarDoenca('SPA')">
+          <span class="sigla">SpA</span>Espondiloartrite
+        </div>
+        <div class="doenca-btn" onclick="selecionarDoenca('LES')">
+          <span class="sigla">LES</span>Lúpus
+        </div>
+        <div class="doenca-btn" onclick="selecionarDoenca('IND')">
+          <span class="sigla">?</span>Indiferenciada
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCO 1 — PACIENTE -->
+    <div class="card" id="bloco-paciente" style="display:none">
+      <div class="card-title">
+        Bloco 1 — Perspectiva do Paciente
+        <span class="badge">Paciente responde</span>
+      </div>
+
+      <div class="campo">
+        <div class="campo-label">
+          <span>Intensidade da dor hoje</span>
+          <span class="campo-valor" id="val-dor">5</span>
+        </div>
+        <input type="range" min="0" max="10" value="5" step="0.5"
+               oninput="atualizarSlider(this,'val-dor')" id="sl-dor">
+        <div class="range-labels"><span>Sem dor</span><span>Dor máxima</span></div>
+      </div>
+
+      <div class="campo">
+        <div class="campo-label">
+          <span>Rigidez matinal</span>
+          <span class="campo-valor" id="val-rigidez">5</span>
+        </div>
+        <input type="range" min="0" max="10" value="5" step="0.5"
+               oninput="atualizarSlider(this,'val-rigidez')" id="sl-rigidez">
+        <div class="range-labels"><span>Nenhuma</span><span>O dia todo</span></div>
+      </div>
+
+      <div class="campo">
+        <div class="campo-label">
+          <span>Fadiga / Cansaço</span>
+          <span class="campo-valor" id="val-fadiga">5</span>
+        </div>
+        <input type="range" min="0" max="10" value="5" step="0.5"
+               oninput="atualizarSlider(this,'val-fadiga')" id="sl-fadiga">
+        <div class="range-labels"><span>Sem fadiga</span><span>Exaustão total</span></div>
+      </div>
+
+      <div class="campo">
+        <div class="campo-label">
+          <span>Limitação nas atividades diárias</span>
+          <span class="campo-valor" id="val-funcao">5</span>
+        </div>
+        <input type="range" min="0" max="10" value="5" step="0.5"
+               oninput="atualizarSlider(this,'val-funcao')" id="sl-funcao">
+        <div class="range-labels"><span>Sem limitação</span><span>Totalmente limitado</span></div>
+      </div>
+
+      <div class="campo">
+        <div class="campo-label">
+          <span>Como você avalia sua saúde hoje?</span>
+          <span class="campo-valor" id="val-global-pac">5</span>
+        </div>
+        <input type="range" min="0" max="10" value="5" step="0.5"
+               oninput="atualizarSlider(this,'val-global-pac')" id="sl-global-pac">
+        <div class="range-labels"><span>Ótima</span><span>Péssima</span></div>
+      </div>
+    </div>
+
+    <!-- BLOCO 2+3 — MÉDICO -->
+    <div class="card" id="bloco-medico" style="display:none">
+      <div class="card-title">
+        Bloco 2+3 — Avaliação Clínica e Laboratorial
+        <span class="badge">Médico preenche</span>
+      </div>
+
+      <!-- AR -->
+      <div id="campos-AR" class="secao-objetiva hidden">
+        <div class="secao-titulo">Artrite Reumatoide</div>
+        <div class="campo-num">
+          <label>Articulações dolorosas (0–28)</label>
+          <input type="number" id="ar-dolor" min="0" max="28" value="0" placeholder="0">
+        </div>
+        <div class="campo-num">
+          <label>Articulações edemaciadas (0–28)</label>
+          <input type="number" id="ar-edema" min="0" max="28" value="0" placeholder="0">
+        </div>
+        <div class="campo-num">
+          <label>PCR (mg/L) <small style="color:#64748b">— normal até 5</small></label>
+          <input type="number" id="ar-pcr" min="0" value="" placeholder="ex: 12">
+        </div>
+        <div class="campo-num">
+          <label>VHS (mm/h) <small style="color:#64748b">— normal até 25</small></label>
+          <input type="number" id="ar-vhs" min="0" value="" placeholder="ex: 30">
+        </div>
+      </div>
+
+      <!-- APs -->
+      <div id="campos-APS" class="secao-objetiva hidden">
+        <div class="secao-titulo">Artrite Psoriásica — DAPSA</div>
+        <div class="campo-num">
+          <label>Articulações dolorosas (0–68)</label>
+          <input type="number" id="aps-dolor" min="0" max="68" value="0" placeholder="0">
+        </div>
+        <div class="campo-num">
+          <label>Articulações edemaciadas (0–66)</label>
+          <input type="number" id="aps-edema" min="0" max="66" value="0" placeholder="0">
+        </div>
+        <div class="campo-num">
+          <label>PCR (mg/L) <small style="color:#64748b">— normal até 5</small></label>
+          <input type="number" id="aps-pcr" min="0" value="" placeholder="ex: 8">
+        </div>
+        <div class="campo-num">
+          <label>VHS (mm/h) <small style="color:#64748b">— normal até 25</small></label>
+          <input type="number" id="aps-vhs" min="0" value="" placeholder="ex: 30">
+        </div>
+        <div class="campo-num">
+          <label>Entesite ativa? (0=não / 1=sim)</label>
+          <input type="number" id="aps-entesite" min="0" max="1" value="0" placeholder="0 ou 1">
+        </div>
+        <div class="campo-num">
+          <label>Dactilite ativa? (0=não / 1=sim)</label>
+          <input type="number" id="aps-dactilite" min="0" max="1" value="0" placeholder="0 ou 1">
+        </div>
+      </div>
+
+      <!-- SpA -->
+      <div id="campos-SPA" class="secao-objetiva hidden">
+        <div class="secao-titulo">Espondiloartrite Axial — ASDAS-VHS</div>
+        <div class="campo-num">
+          <label>Dor lombar noturna (0–10)</label>
+          <input type="number" id="spa-dor-noturna" min="0" max="10" value="0" placeholder="0–10">
+        </div>
+        <div class="campo-num">
+          <label>VHS (mm/h) <small style="color:#64748b">— normal até 25</small></label>
+          <input type="number" id="spa-vhs" min="0" value="" placeholder="ex: 35">
+        </div>
+        <div class="campo-num">
+          <label>PCR (mg/L) <small style="color:#64748b">— normal até 5 (opcional)</small></label>
+          <input type="number" id="spa-pcr" min="0" value="" placeholder="ex: 12">
+        </div>
+        <div class="campo-num">
+          <label>Resposta aos AINEs (0=nenhuma / 10=excelente)</label>
+          <input type="number" id="spa-aines" min="0" max="10" value="0" placeholder="0–10">
+        </div>
+      </div>
+
+      <!-- LES -->
+      <div id="campos-LES" class="secao-objetiva hidden">
+        <div class="secao-titulo">Lúpus — SLEDAI Adaptado</div>
+        <div class="campo-num">
+          <label>Complemento C3/C4 baixo? (0=não / 1=sim)</label>
+          <input type="number" id="les-complemento" min="0" max="1" value="0" placeholder="0 ou 1">
+        </div>
+        <div class="campo-num">
+          <label>Anti-dsDNA elevado? (0=não / 1=sim)</label>
+          <input type="number" id="les-dsdna" min="0" max="1" value="0" placeholder="0 ou 1">
+        </div>
+        <div class="campo-num">
+          <label>Proteinúria significativa? (0=não / 1=sim)</label>
+          <input type="number" id="les-proteinuria" min="0" max="1" value="0" placeholder="0 ou 1">
+        </div>
+        <div class="secao-titulo">Manifestações sistêmicas ativas</div>
+        <div class="manifestacoes" id="manif-les">
+          <label class="manif-item"><input type="checkbox" value="1"> Artrite ativa</label>
+          <label class="manif-item"><input type="checkbox" value="1"> Rash / lesão cutânea</label>
+          <label class="manif-item"><input type="checkbox" value="1"> Fotossensibilidade</label>
+          <label class="manif-item"><input type="checkbox" value="1"> Úlceras orais</label>
+          <label class="manif-item"><input type="checkbox" value="1"> Alopecia ativa</label>
+          <label class="manif-item"><input type="checkbox" value="1"> Pleurite / pericardite</label>
+          <label class="manif-item"><input type="checkbox" value="1"> Nefrite (hematúria/cilindrúria)</label>
+          <label class="manif-item"><input type="checkbox" value="1"> Manifestação neurológica</label>
+          <label class="manif-item"><input type="checkbox" value="1"> Anemia hemolítica</label>
+          <label class="manif-item"><input type="checkbox" value="1"> Leucopenia / plaquetopenia</label>
+          <label class="manif-item"><input type="checkbox" value="1"> Febre lúpica</label>
+          <label class="manif-item"><input type="checkbox" value="1"> Vasculite</label>
+        </div>
+      </div>
+
+      <!-- Indiferenciada -->
+      <div id="campos-IND" class="secao-objetiva hidden">
+        <div class="secao-titulo">Dor Inflamatória Indiferenciada</div>
+        <div class="campo-num">
+          <label>PCR (mg/L) <small style="color:#64748b">— normal até 5</small></label>
+          <input type="number" id="ind-pcr" min="0" value="" placeholder="ex: 10">
+        </div>
+        <div class="campo-num">
+          <label>VHS (mm/h) <small style="color:#64748b">— normal até 25</small></label>
+          <input type="number" id="ind-vhs" min="0" value="" placeholder="ex: 25">
+        </div>
+      </div>
+
+      <!-- Avaliação global médico — comum a todas -->
+      <div class="secao-titulo" style="margin-top:20px">Avaliação Global do Médico</div>
+      <div class="campo" style="margin-top:8px">
+        <div class="campo-label">
+          <span>Atividade da doença (sua avaliação)</span>
+          <span class="campo-valor" id="val-global-med">5</span>
+        </div>
+        <input type="range" min="0" max="10" value="5" step="0.5"
+               oninput="atualizarSlider(this,'val-global-med')" id="sl-global-med">
+        <div class="range-labels"><span>Remissão</span><span>Alta atividade</span></div>
+      </div>
+    </div>
+
+    <button class="btn-calcular" id="btn-calc" style="display:none" onclick="calcular()">
+      Calcular — Ver Resultado no Alvo
+    </button>
+
+  </div><!-- /formulario -->
+
+  <!-- RESULTADO -->
+  <div id="resultado">
+
+    <div class="resultado-header">
+      <h2 id="res-titulo">Avaliação Concluída</h2>
+      <p id="res-doenca-label"></p>
+    </div>
+
+    <div class="card">
+      <div class="alvo-container">
+        <svg id="alvo-svg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+          <!-- Anéis monocromáticos (slate), do maior ao menor -->
+          <circle cx="120" cy="120" r="110" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/>
+          <circle cx="120" cy="120" r="80"  fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+          <circle cx="120" cy="120" r="50"  fill="#cbd5e1" stroke="#64748b" stroke-width="2"/>
+          <circle cx="120" cy="120" r="22"  fill="#334155" stroke="#1e293b" stroke-width="2"/>
+          <!-- Mira (crosshair) sutil -->
+          <line x1="120" y1="6"   x2="120" y2="234" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="3,6" opacity="0.5"/>
+          <line x1="6"   y1="120" x2="234" y2="120" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="3,6" opacity="0.5"/>
+          <!-- Labels das zonas (monocromáticos) -->
+          <text x="120" y="17"  text-anchor="middle" font-size="9" fill="#64748b" font-weight="600" letter-spacing="0.5">ALTA</text>
+          <text x="120" y="46"  text-anchor="middle" font-size="9" fill="#475569" font-weight="600" letter-spacing="0.5">MOD.</text>
+          <text x="120" y="74"  text-anchor="middle" font-size="9" fill="#334155" font-weight="600" letter-spacing="0.5">LEVE</text>
+          <text x="120" y="125" text-anchor="middle" font-size="9" fill="white"   font-weight="700" letter-spacing="0.5">ALVO</text>
+          <!-- Ponto do paciente -->
+          <circle id="ponto-paciente" cx="120" cy="120" r="9" fill="#1e293b" stroke="white" stroke-width="2.5"/>
+        </svg>
+
+        <div class="pontuacao-display">
+          <div class="numero" id="res-numero" style="color:#3b82f6">—</div>
+          <div class="label">Pontuação de atividade (0–10)</div>
+        </div>
+      </div>
+
+      <div id="res-classificacao" class="classificacao classif-verde">
+        <div class="classif-icone">🎯</div>
+        <div class="classif-texto">
+          <h3 id="res-classif-titulo">—</h3>
+          <p id="res-classif-desc">—</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta-card">
+      <h3>🎯 Meta — Método Alvo</h3>
+      <p id="res-meta">—</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Detalhamento por dimensão</div>
+      <div class="dimensoes" id="res-dimensoes"></div>
+    </div>
+
+    <button class="btn-nova" onclick="novaAvaliacao()">Nova Avaliação</button>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  let doencaSelecionada = null;
+
+  function selecionarDoenca(d) {
+    doencaSelecionada = d;
+    document.querySelectorAll('.doenca-btn').forEach(b => b.classList.remove('ativo'));
+    event.currentTarget.classList.add('ativo');
+
+    document.getElementById('bloco-paciente').style.display = 'block';
+    document.getElementById('bloco-medico').style.display = 'block';
+    document.getElementById('btn-calc').style.display = 'block';
+
+    ['AR','APS','SPA','LES','IND'].forEach(id => {
+      document.getElementById('campos-'+id).classList.add('hidden');
+    });
+    document.getElementById('campos-'+d).classList.remove('hidden');
+
+    window.scrollTo({top: document.getElementById('bloco-paciente').offsetTop - 20, behavior: 'smooth'});
+  }
+
+  function atualizarSlider(el, valId) {
+    const val = parseFloat(el.value);
+    document.getElementById(valId).textContent = val.toFixed(1);
+    const pct = (val / 10) * 100;
+    el.style.background = `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${pct}%, #e2e8f0 ${pct}%)`;
+  }
+
+  function getVal(id) {
+    const el = document.getElementById(id);
+    return el ? parseFloat(el.value) || 0 : 0;
+  }
+
+  // Normaliza PCR (limite 5 mg/L) → 0–10 por múltiplos
+  function normPCR(v) {
+    if (v <= 5)  return 0;
+    if (v <= 10) return 2 + (v - 5)  / 5  * 2;   // 1–2x → 2–4
+    if (v <= 25) return 4 + (v - 10) / 15 * 3;   // 2–5x → 4–7
+    if (v <= 50) return 7 + (v - 25) / 25 * 2;   // 5–10x → 7–9
+    return 10;                                     // >10x → 10
+  }
+
+  // Normaliza VHS (limite 25 mm/h) → 0–10 por múltiplos
+  function normVHS(v) {
+    if (v <= 25)  return 0;
+    if (v <= 50)  return 2 + (v - 25) / 25 * 2;  // 1–2x → 2–4
+    if (v <= 75)  return 4 + (v - 50) / 25 * 3;  // 2–3x → 4–7
+    if (v <= 100) return 7 + (v - 75) / 25 * 2;  // 3–4x → 7–9
+    return 10;                                     // >4x → 10
+  }
+
+  // Usa o pior entre PCR e VHS (ou o disponível)
+  function normInflamacao(pcrId, vhsId) {
+    const pcr = document.getElementById(pcrId)?.value;
+    const vhs = document.getElementById(vhsId)?.value;
+    const sPCR = pcr !== '' && pcr !== null ? normPCR(parseFloat(pcr) || 0) : null;
+    const sVHS = vhs !== '' && vhs !== null ? normVHS(parseFloat(vhs) || 0) : null;
+    if (sPCR !== null && sVHS !== null) return { score: Math.max(sPCR, sVHS), pcr: sPCR, vhs: sVHS };
+    if (sPCR !== null) return { score: sPCR, pcr: sPCR, vhs: null };
+    if (sVHS !== null) return { score: sVHS, pcr: null, vhs: sVHS };
+    return { score: 0, pcr: 0, vhs: 0 };
+  }
+
+  function calcular() {
+    if (!doencaSelecionada) { alert('Selecione a doença primeiro.'); return; }
+
+    // BLOCO 1 — paciente (40%)
+    const dor        = getVal('sl-dor');
+    const rigidez    = getVal('sl-rigidez');
+    const fadiga     = getVal('sl-fadiga');
+    const funcao     = getVal('sl-funcao');
+    const globalPac  = getVal('sl-global-pac');
+    const globalMed  = getVal('sl-global-med');
+
+    const bloco1 = (dor*0.10 + rigidez*0.08 + fadiga*0.07 + funcao*0.08 + globalPac*0.07) / 0.40 * 10;
+
+    let bloco2 = 0;
+    let dimensoes = [];
+
+    if (doencaSelecionada === 'AR') {
+      const dolor = Math.min(getVal('ar-dolor') / 28 * 10, 10);
+      const edema = Math.min(getVal('ar-edema') / 28 * 10, 10);
+      const infla = normInflamacao('ar-pcr', 'ar-vhs');
+      bloco2 = (dolor*0.15 + edema*0.15 + infla.score*0.15 + globalMed*0.15) / 0.60 * 10;
+      dimensoes = [
+        {nome:'Articulações dolorosas', val: dolor},
+        {nome:'Articulações edemaciadas', val: edema},
+        {nome:'PCR (normalizado)', val: infla.pcr ?? 0},
+        {nome:'VHS (normalizado)', val: infla.vhs ?? 0},
+        {nome:'Avaliação médico', val: globalMed},
+      ];
+    } else if (doencaSelecionada === 'APS') {
+      const dolor     = Math.min(getVal('aps-dolor') / 68 * 10, 10);
+      const edema     = Math.min(getVal('aps-edema') / 66 * 10, 10);
+      const infla     = normInflamacao('aps-pcr', 'aps-vhs');
+      const entesite  = getVal('aps-entesite') * 10;
+      const dactilite = getVal('aps-dactilite') * 10;
+      bloco2 = (dolor*0.12 + edema*0.12 + infla.score*0.18 + (entesite+dactilite)/2*0.03 + globalMed*0.15) / 0.60 * 10;
+      dimensoes = [
+        {nome:'Articulações dolorosas', val: dolor},
+        {nome:'Articulações edemaciadas', val: edema},
+        {nome:'PCR (normalizado)', val: infla.pcr ?? 0},
+        {nome:'VHS (normalizado)', val: infla.vhs ?? 0},
+        {nome:'Entesite / Dactilite', val: (entesite+dactilite)/2},
+        {nome:'Avaliação médico', val: globalMed},
+      ];
+    } else if (doencaSelecionada === 'SPA') {
+      const dorNoturna = getVal('spa-dor-noturna');
+      const infla      = normInflamacao('spa-pcr', 'spa-vhs');
+      const aines      = 10 - getVal('spa-aines');
+      bloco2 = (dorNoturna*0.15 + infla.score*0.15 + aines*0.15 + globalMed*0.15) / 0.60 * 10;
+      dimensoes = [
+        {nome:'Dor noturna', val: dorNoturna},
+        {nome:'VHS (normalizado)', val: infla.vhs ?? 0},
+        {nome:'PCR (normalizado)', val: infla.pcr ?? 0},
+        {nome:'Resposta AINEs (inv.)', val: aines},
+        {nome:'Avaliação médico', val: globalMed},
+      ];
+    } else if (doencaSelecionada === 'LES') {
+      const complemento = getVal('les-complemento') * 10;
+      const dsdna       = getVal('les-dsdna') * 10;
+      const proteinuria = getVal('les-proteinuria') * 10;
+      const checkboxes  = document.querySelectorAll('#manif-les input[type=checkbox]:checked');
+      const manifScore  = Math.min(checkboxes.length / 12 * 10, 10);
+      bloco2 = (manifScore*0.20 + complemento*0.10 + dsdna*0.10 + proteinuria*0.05 + globalMed*0.15) / 0.60 * 10;
+      dimensoes = [
+        {nome:'Manifestações sistêmicas', val: manifScore},
+        {nome:'Complemento C3/C4', val: complemento},
+        {nome:'Anti-dsDNA', val: dsdna},
+        {nome:'Proteinúria', val: proteinuria},
+        {nome:'Avaliação médico', val: globalMed},
+      ];
+    } else { // IND
+      const infla = normInflamacao('ind-pcr', 'ind-vhs');
+      bloco2 = (infla.score*0.45 + globalMed*0.15) / 0.60 * 10;
+      dimensoes = [
+        {nome:'PCR (normalizado)', val: infla.pcr ?? 0},
+        {nome:'VHS (normalizado)', val: infla.vhs ?? 0},
+        {nome:'Avaliação médico', val: globalMed},
+      ];
+    }
+
+    // PONTUAÇÃO FINAL
+    const pontuacao = (bloco1 * 0.40 + bloco2 * 0.60) / 10;
+    const score = Math.min(pontuacao, 10);
+
+    mostrarResultado(score, dimensoes, [
+      {nome:'Dor', val: dor},
+      {nome:'Rigidez matinal', val: rigidez},
+      {nome:'Fadiga', val: fadiga},
+      {nome:'Função', val: funcao},
+      {nome:'Saúde geral (paciente)', val: globalPac},
+      ...dimensoes
+    ]);
+  }
+
+  function mostrarResultado(score, dimObjt, todasDim) {
+    document.getElementById('formulario').style.display = 'none';
+    document.getElementById('resultado').style.display = 'block';
+
+    const nomes = {AR:'Artrite Reumatoide', APS:'Artrite Psoriásica', SPA:'Espondiloartrite Axial', LES:'Lúpus', IND:'Indiferenciada'};
+    document.getElementById('res-doenca-label').textContent = nomes[doencaSelecionada];
+    document.getElementById('res-numero').textContent = score.toFixed(1);
+
+    // ALVO — posicionar ponto
+    posicionarPonto(score);
+
+    // CLASSIFICAÇÃO
+    let classif, classifDesc, meta, corNum, corCard;
+    if (score <= 3.0) {
+      classif = '🎯 Remissão / Baixa Atividade';
+      classifDesc = 'Alvo atingido. A doença está sob controle.';
+      meta = 'Parabéns — você está no alvo! O objetivo agora é manter a remissão. Seguimos juntos para garantir que a doença continue controlada.';
+      corNum = '#22c55e'; corCard = 'classif-verde';
+    } else if (score <= 6.0) {
+      classif = '⚠️ Atividade Moderada';
+      classifDesc = 'Você está no caminho. Ajustes no tratamento podem ser necessários.';
+      meta = `Meta: reduzir a pontuação abaixo de 3,0 (remissão). Vamos revisar o tratamento atual e definir o próximo passo para chegar ao alvo.`;
+      corNum = '#eab308'; corCard = 'classif-amarelo';
+    } else {
+      classif = '🔴 Alta Atividade';
+      classifDesc = 'A doença está ativa. É necessário intensificar o tratamento.';
+      meta = `Meta: reduzir a pontuação abaixo de 3,0 (remissão). Vamos traçar um plano intensivo para atingir o alvo o mais breve possível.`;
+      corNum = '#ef4444'; corCard = 'classif-vermelho';
+    }
+
+    document.getElementById('res-numero').style.color = corNum;
+    document.getElementById('res-classif-titulo').textContent = classif;
+    document.getElementById('res-classif-desc').textContent = classifDesc;
+    document.getElementById('res-meta').textContent = meta;
+
+    const el = document.getElementById('res-classificacao');
+    el.className = `classificacao ${corCard}`;
+
+    // DIMENSÕES
+    const cont = document.getElementById('res-dimensoes');
+    cont.innerHTML = '';
+    todasDim.forEach(d => {
+      const cor = d.val <= 3 ? '#22c55e' : d.val <= 6 ? '#eab308' : '#ef4444';
+      cont.innerHTML += `
+        <div class="dim-item">
+          <span class="dim-nome">${d.nome}</span>
+          <div class="dim-barra-wrap">
+            <div class="dim-barra" style="width:${d.val*10}%;background:${cor}"></div>
+          </div>
+          <span class="dim-valor" style="color:${cor}">${d.val.toFixed(1)}</span>
+        </div>`;
+    });
+
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function posicionarPonto(score) {
+    // score 0–10 → raio 0–108 no SVG (centro=120,120)
+    const raio = (score / 10) * 108;
+    const angulo = -Math.PI / 2; // topo
+    const cx = 120 + raio * Math.cos(angulo);
+    const cy = 120 + raio * Math.sin(angulo);
+    const ponto = document.getElementById('ponto-paciente');
+    ponto.setAttribute('cx', cx.toFixed(1));
+    ponto.setAttribute('cy', cy.toFixed(1));
+    // Cor do ponto indica a zona
+    const cor = score <= 3 ? '#22c55e' : score <= 6 ? '#eab308' : '#ef4444';
+    ponto.setAttribute('fill', cor);
+  }
+
+  function novaAvaliacao() {
+    document.getElementById('resultado').style.display = 'none';
+    document.getElementById('formulario').style.display = 'block';
+    document.querySelectorAll('.doenca-btn').forEach(b => b.classList.remove('ativo'));
+    document.getElementById('bloco-paciente').style.display = 'none';
+    document.getElementById('bloco-medico').style.display = 'none';
+    document.getElementById('btn-calc').style.display = 'none';
+    doencaSelecionada = null;
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  // Inicializar sliders
+  document.querySelectorAll('input[type=range]').forEach(el => {
+    const pct = (parseFloat(el.value) / 10) * 100;
+    el.style.background = `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${pct}%, #e2e8f0 ${pct}%)`;
+  });
+
+  // Checkboxes LES — highlight ao marcar
+  document.querySelectorAll('#manif-les input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', function() {
+      this.closest('.manif-item').classList.toggle('ativo', this.checked);
+    });
+  });
+</script>
+</body>
+</html>

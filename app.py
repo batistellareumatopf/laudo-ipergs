@@ -768,13 +768,13 @@ SADT_PDF_ORIGINAL = os.path.join(BASE_DIR, "unimed-sadt", "formulario_sadt.pdf")
 SADT_ORIG_W, SADT_ORIG_H = 2058.0, 2924.0
 SADT_LAND_W, SADT_LAND_H = SADT_ORIG_H, SADT_ORIG_W
 SADT_CAMPOS = {
-    # Calibrado em 2026-05-15: nome desceu 0,2cm (-20), descrições subiram 0,5cm (+49)
-    # Escala: ~98 unidades por cm (PDF A4 com mediabox 2058×2924)
-    "nome":        {"x": 1217, "y": 1750, "tamanho": 34},
+    # Calibrado em 2026-05-15 · escala ~98 unidades/cm (PDF A4 mediabox 2058×2924)
+    # Acumulado: nome desceu 0,5cm (-49) · descrições subiram 0,8cm (+78)
+    "nome":        {"x": 1217, "y": 1721, "tamanho": 34},
     "ind_clinica": {"x":  807, "y": 1419, "tamanho": 34},
-    "descricao1":  {"x":  591, "y": 1333, "tamanho": 34},
-    "descricao2":  {"x":  591, "y": 1278, "tamanho": 34},
-    "descricao3":  {"x":  591, "y": 1223, "tamanho": 34},
+    "descricao1":  {"x":  591, "y": 1362, "tamanho": 34},
+    "descricao2":  {"x":  591, "y": 1307, "tamanho": 34},
+    "descricao3":  {"x":  591, "y": 1252, "tamanho": 34},
 }
 
 # Campos preenchidos automaticamente com dados do médico

@@ -791,12 +791,8 @@ def unimed_sadt():
         desc2  = request.form.get('descricao2', '').strip()
         desc3  = request.form.get('descricao3', '').strip()
         try:
-            reader = PdfReader(SADT_PDF_ORIGINAL)
-            page = reader.pages[0]
-            t = Transformation((0, 1, -1, 0, SADT_ORIG_H, 0))
-            page.add_transformation(t)
-            page.mediabox = RectangleObject([0, 0, SADT_LAND_W, SADT_LAND_H])
-
+            # Gera APENAS o overlay (página em branco com os textos preenchidos)
+            # — pra impressão sobre papel pré-impresso da Unimed
             overlay_buf = io.BytesIO()
             c = canvas.Canvas(overlay_buf, pagesize=(SADT_LAND_W, SADT_LAND_H))
             c.setFillColor(black)
@@ -813,10 +809,9 @@ def unimed_sadt():
 
             overlay_buf.seek(0)
             overlay = PdfReader(overlay_buf)
-            page.merge_page(overlay.pages[0])
 
             writer = PdfWriter()
-            writer.add_page(page)
+            writer.add_page(overlay.pages[0])
             out = io.BytesIO()
             writer.write(out)
             out.seek(0)

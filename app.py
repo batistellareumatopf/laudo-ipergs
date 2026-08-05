@@ -824,9 +824,10 @@ def unimed_sadt():
             out.seek(0)
             hoje = datetime.date.today().strftime('%d-%m-%Y')
             nome_arq = make_filename('GUIA_SADT', nome, hoje).replace('.xlsx', '.pdf')
+            # inline: abre na aba pra impressão, não baixa pro disco
             return send_file(out, mimetype="application/pdf",
                              download_name=nome_arq,
-                             as_attachment=True)
+                             as_attachment=False)
         except Exception as e:
             return render_template('unimed_sadt.html',
                                    nome=nome, ind_clinica=ind,

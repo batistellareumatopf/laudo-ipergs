@@ -24,7 +24,7 @@
                 </div>
                 {% endif %}
 
-                <form method="POST" action="/unimed/sadt">
+                <form method="POST" action="/unimed/sadt" id="form-sadt">
                     <div class="mb-3">
                         <label class="form-label">
                             Nome do Paciente
@@ -56,9 +56,64 @@
                     </button>
                 </form>
 
+                <div id="aviso-sadt" class="alert alert-warning py-2 mt-3 d-none">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span id="aviso-sadt-txt"></span>
+                </div>
+
             </div>
         </div>
 
     </div>
 </div>
+
+<script>
+(function () {
+    var form = document.getElementById('form-sadt');
+    var aviso = document.getElementById('aviso-sadt');
+    var avisoTxt = document.getElementById('aviso-sadt-txt');
+
+    // Sem fetch/Blob (navegador antigo), deixa o formulário enviar do jeito normal
+    if (!window.fetch || !window.URL || !window.URL.createObjectURL) return;
+
+    function mostrarAviso(msg) {
+        avisoTxt.textContent = msg;
+        aviso.classList.remove('d-none');
+    }
+
+    form.addEventListener('submit', function (ev) {
+        var nome = form.querySelector('[name="nome"]').value.trim();
+        if (!nome) return;  // deixa o servidor devolver o aviso de nome vazio
+
+        ev.preventDefault();
+        aviso.classList.add('d-none');
+
+        // Abre a aba AGORA, dentro do clique — senão o bloqueador de pop-up barra
+        var aba = window.open('', '_blank');
+        if (!aba) {
+            mostrarAviso('O navegador bloqueou a abertura da aba. Libere os pop-ups deste site e tente de novo.');
+            return;
+        }
+        aba.document.write('<p style="font-family:sans-serif;padding:24px">Gerando a guia…</p>');
+
+        fetch(form.action, { method: 'POST', body: new FormData(form) })
+            .then(function (r) {
+                if (!r.ok) throw new Error('O servidor respondeu ' + r.status);
+                var tipo = r.headers.get('content-type') || '';
+                if (tipo.indexOf('pdf') === -1) throw new Error('O servidor não devolveu um PDF.');
+                return r.blob();
+            })
+            .then(function (blob) {
+                var url = URL.createObjectURL(blob);
+                aba.location.href = url;
+                // libera a memória depois que a aba já carregou o arquivo
+                setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+            })
+            .catch(function (err) {
+                aba.close();
+                mostrarAviso('Não foi possível gerar a guia: ' + err.message);
+            });
+    });
+})();
+</script>
 {% endblock %}

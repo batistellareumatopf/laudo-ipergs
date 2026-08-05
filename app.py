@@ -792,6 +792,11 @@ def unimed_sadt():
         desc1  = request.form.get('descricao1', '').strip()
         desc2  = request.form.get('descricao2', '').strip()
         desc3  = request.form.get('descricao3', '').strip()
+        if not nome:
+            return render_template('unimed_sadt.html',
+                                   nome=nome, ind_clinica=ind,
+                                   descricao1=desc1, descricao2=desc2, descricao3=desc3,
+                                   erro='Informe o nome do paciente.')
         try:
             # Gera APENAS o overlay (página em branco com os textos preenchidos)
             # — pra impressão sobre papel pré-impresso da Unimed
@@ -817,9 +822,11 @@ def unimed_sadt():
             out = io.BytesIO()
             writer.write(out)
             out.seek(0)
+            hoje = datetime.date.today().strftime('%d-%m-%Y')
+            nome_arq = make_filename('GUIA_SADT', nome, hoje).replace('.xlsx', '.pdf')
             return send_file(out, mimetype="application/pdf",
-                             download_name="GUIA_PREENCHIDA.pdf",
-                             as_attachment=False)
+                             download_name=nome_arq,
+                             as_attachment=True)
         except Exception as e:
             return render_template('unimed_sadt.html',
                                    nome=nome, ind_clinica=ind,
